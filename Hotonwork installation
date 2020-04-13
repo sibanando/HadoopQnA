@@ -1,0 +1,37 @@
+Transparent Huge Pages Issues (0)
+JDK Issues (0)
+Disk Issues (0)
+Repository Issues (0)
+Firewall Issues (0)
+Process Issues (0)
+Package Issues (0)
+File and Folder Issues (0)
+Service Issues (0)
+User Issues (0)
+Misc Issues (0)
+Alternatives Issues (0)
+Reverse Lookup Issues (0)
+Hostname Resolution Issues (0)
+
+
+https://www.techrunnr.com/how-to-install-ambari-in-centos-7-using-mysql/
+
+wget -nv http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.0.0/ambari.repo -O /etc/yum.repos.d/ambari.repo
+
+/etc/init.d/ambari-server start
+
+sudo yum install -y mysql-connector-java to install mysql-connector-java.jar
+rpm -ql mysql-connector-java-*
+ambari-server setup --jdbc-db=mysql --jdbc-driver=/usr/share/java/mysql-connector-java.jar
+
+
+wget https://jdbc.postgresql.org/download/postgresql-42.2.9.jar
+ambari-server setup --jdbc-db=postgres --jdbc-driver=/root/postgresql-42.2.9.jar/to/postgres/org.postgresql.Driver
+
+
+ CREATE USER 'hive'@'hdpslave02.us-central1-a.c.encoded-bonfire-259210.internal' IDENTIFIED BY 'admin';
+ GRANT ALL PRIVILEGES ON *.* TO 'hive'@'hdpslave02.us-central1-a.c.encoded-bonfire-259210.internal';
+ CREATE USER 'hive'@'' IDENTIFIED BY 'admin';
+ GRANT ALL PRIVILEGES ON *.* TO 'hive'@'';
+ CREATE USER 'hive'@'' IDENTIFIED BY 'admin';
+ GRANT ALL PRIVILEGES ON *.* TO 'hive'@'';

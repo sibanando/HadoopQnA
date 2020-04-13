@@ -1,0 +1,65 @@
+
+# /opt/mapr/server/mrconfig sp refresh
+#/opt/mapr/server/mrconfig sp list -v
+dmesg |grep sdq
+
+cat /root/disks.txt
+cat /opt/mapr/conf/disktab
+cat /sys/block/<<<disk name>>>/device/state
+cat /sys/block/sdj/device/state
+ 
+cat /sys/block/sde/device/state
+
+Warden stop not required, at the end you may restart the warden.
+
+###################
+LUKS 
+
+cryptsetup --batch-mode --use-random luksFormat /dev/sdq /etc/crypto/lukskey.bin
+cryptsetup luksOpen /dev/sdq luks-sdq < /etc/crypto/lukskey.bin
+
+
+cryptsetup --batch-mode --use-random luksFormat /dev/sdq /etc/crypto/lukskey.bin
+cryptsetup luksOpen /dev/sdq luks-sdq < /etc/crypto/lukskey.bin
+
+
+
+ 
+
+check if added luks --> fdisk -l |grep /dev/sdq
+
+add missing disk to disklist file 
+#####disklist content -----> 
+/dev/mapper/luks-sdf
+/dev/mapper/luks-sdg
+/dev/mapper/luks-sdh
+/dev/mapper/luks-sdi
+
+    
+# /opt/mapr/server/disksetup -F /tmp/mapr.disks >>>>>> /opt/mapr/server/disksetup W 4 /root/setup_files/disks.txt
+    /dev/sdi added.	
+    /dev/sdj added.
+    /dev/sdk added.
+
+
+ service mapr-warden restart
+    
+[root@iron10a init.d]# /opt/mapr/server/mrconfig sp list -v
+clush -bg sand '/opt/mapr/server/mrconfig sp list -v'
+
+###############################
+1./opt/mapr/logs/mfs.log-3
+2. /opt/mapr/server/mrconfig sp list -v
+3.cat /opt/mapr/conf/disktab
+4./var/log/messages
+5./var/log/dmesg
+6.faildisk.log 
+7.fdisk -l
+
+
+maprcli disk add -disks /dev/sda1 -host 10.250.1.79
+
+#######NOTE#####
+udevadm control --reload-rules && udevadm trigger 
+
+echo stat | nc localhost 2181 | grep Mode

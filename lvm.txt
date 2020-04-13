@@ -1,0 +1,181 @@
+yum install sysfutils
+
+systool -c fc_host -v
+
+systool -c fc_host -v | grep port_name(find wwns for hba ports)
+systool -c fc_host -v | grep port_state
+
+cat /sys/class/fc_host/host0/node_name
+
+cat /sys/class/scsi_host/host0/node_name
+
+echo"1"> /sys/class/fc_host/host0/issue_lip
+echo "- - -" > /sys/class/scsi_host/host0/scan
+
+yum install sg3_utils
+rescan-scsi-bus.sh
+
+
+lscpu
+nproc
+###############
+
+vgs
+vgextend rhel /dev/sdd
+echo "3" > /proc/sys/vm/drop_caches
+swapoff -v /dev/rhel/swap
+lvm lvresize /dev/rhel/swap -L 6G
+swap /dev/rhel/swap
+swapon -va
+
+
+ # multipath -ll
+ # pvcreate /dev/mapper/mpatha /dev/mapper/mpathc /dev/mapper/mpathd /dev/mapper/mpathb /dev/mapper/mpathe
+ # vgcreate datavg01 /dev/mapper/mpatha /dev/mapper/mpathc /dev/mapper/mpathd /dev/mapper/mpathb /dev/mapper/mpathe
+ # vgs
+ # lvcreate -l 100%FREE -n "data01" datavg01
+ # mkfs.xfs /dev/mapper/datavg01-data01
+ # vi /etc/fstab
+ # mkdir /data01
+ # mount -a
+ # vi /etc/fstab
+ # mount -a
+ # df -lh
+ # mount
+ # clear
+ # df -lh
+ # history
+
+ lsscsi -s
+ pvcreate /dev/sdb
+  pvs
+ vgcreate datavg /dev/sdb
+ vgs
+ lvcreate -l 100%FREE -n "oracle" datavg
+ mkfs.ext4  /dev/datavg/oracle
+ mkfs -t ext4 /dev/datavg/oracle (new)
+ mkdir /oracle
+ vi /etc/fstab
+ mount -a
+ df -lh
+ df -h
+ umount /oracle/
+ lvremove /dev/mapper/datavg-oracle
+ lsscsi -s
+ pvs
+ vgs
+ multipath -ll
+ df -h
+ vgs
+ lvs
+ lvcreate --help
+ lvcreate -l 20%FREE -n "app" datavg
+ mkfs.xfs /dev/mapper/datavg01-data01
+ mkfs.ext4 /dev/mapper/datavg-app
+ vi /etc/fstab
+ mkdir /app
+ mount -a
+ df -h
+ lvcreate -l 25%FREE -n "bkp" datavg
+ mkfs.ext4 /dev/mapper/datavg-bkp
+ vi /etc/fstab
+ mkdir /bkp
+ mount -a
+ df -h
+ df -lh
+ lvremove /app
+ lvremove /dev/mapper/datavg-app
+ df -h
+ vi /etc/fstab
+ umount /app/
+ lvremove /dev/mapper/datavg-app
+ df -h
+  422  lvcreate -l 17%FREE -n "ap" datavg
+  423  mkfs.ext4 /dev/mapper/datavg-ap
+  424  mkdir /ap
+  425  vi /etc/fstab
+  426  mount -a
+  427  df -h
+  428  resize -L 150G /dev/mapper/datavg-ap
+  429  lvresize -L 150G /dev/mapper/datavg-ap
+  430  df -h
+  431  lvresize -L 180G /dev/mapper/datavg-ap
+  432  df -h
+  433  vgs
+  434  lvs
+  435  lvresize -L 150G /dev/mapper/datavg-ap
+  436  lvs
+  437  df -lh
+  438  mount -a
+  439  df -lh
+  440  lvs
+  441  df -lh
+  442  resize2fs -L 150G /dev/mapper/datavg-ap
+  445  resize2fs --help
+  446  history
+  447  df -lh
+  448  lvresize /dev/datavg/ap -L 150G
+  449  resize2fs /dev/mapper/datavg-ap
+  450  df -lh
+  451  lvresize /dev/datavg/bkp -L 200G
+  452  resize2fs /dev/mapper/datavg-bkp
+  453  umount /bkp/
+  454  resize2fs /dev/mapper/datavg-bkp
+  455  e2fsck -f /dev/mapper/datavg-bkp
+  456  mount -a
+  457  lvs
+  458  lvremove /dev/datavg/bkp
+
+  460  lvcreate -n -L 200G "bkp" /dev/datavg/bkp
+  461  vgs
+ 
+  463  lvcreate -L 200G -n "bkp" datavg /dev/sdb
+  464  mkfs.ext4 /dev/mapper/datavg-bkp
+  465  mount -a
+  466  df -lh
+  
+  468  lvreduce /dev/vg00/tmpvol -L 5G
+  469  swapon -v
+  470  swapoff -a
+  471  lvresize /dev/vg00/swapvol -L 9G
+  472  mkswap /dev/mapper/vg00-swapvol
+  473  swapon -v
+  474  swapon -v
+  475  swapon -a
+  476  swapon -v
+  477  history
+  478  vi /etc/ntp.conf
+  479  history
+  
+  
+  ----
+  
+   153  fdisk /dev/sdb
+
+   159  mkfs.ex4 /dev/sdb1
+  160  mke2fs -f /dev/sda1
+  161  mkfs -t ext4 /dev/sdb1
+  162  mkfs -t ext4 /dev/sdb2
+  163  lsblk
+  164  pvcreate /dev/sdb1 /dev/sdb2
+  165  pvs
+  166  vgcreate vg /dev/sdb1 /dev/sdb2
+  167  vgs
+  168  vgs -vv
+  169  vgs -v
+  170  vgdisplay
+  171  vgs -v
+  172  lvcreate -l lvcreate -l 100%FREE -n "lvoracle" vg
+  173  lvcreate -l 100%FREE -n "lvoracle" vg
+  174  lvs
+  175  lvremove /dev/mapper/vg-lvoracle
+  176  lvs
+  177  mkdir sibalv
+  178  lvcreate -l 100%FREE -n "lvoracle" vg
+  179  mkfs -t ext4 /dev/mapper/vg-lvoracle
+  180  lvs /dev/mapper/vg-lvoracle
+  181  mount /dev/mapper/vg-lvoracle sibalv/
+  182  ls -ld sibalv/
+  183  df - HT
+  184  df -HT
+

@@ -1,0 +1,8 @@
+hadoop distcp  maprfs:///bar 104.197.60.34:50070/foo
+
+
+
+hadoop distcp hftp:// (https://community.mapr.com/external-link.jspa?url=ftp%3A%2F%2F)<CDH3 Cluster>:50070/<dir> maprfs://<MapR Cluster>:7222/<dir>
+
+
+maprfs://104.197.60.34:7222/tmp/

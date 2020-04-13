@@ -1,0 +1,47 @@
+find / -name "*resourcemanager*.jar"
+
+/opt/cloudera/parcels/CDH-5.13.0-1.cdh5.13.0p0.29/lib/hadoop-yarn/hadoop-yarn-server-resourcemanager.jar
+
+
+/opt/cloudera/parcels/CDH-5.16.2-1.cdh5.16.2.p0.8/lib/hadoop-yarn/hadoop-yarn-server-resourcemanager.jar
+
+
+/usr/java/jdk1.7.0_67-cloudera/bin/jar -tvf /opt/cloudera/parcels/CDH-5.16.2-1.cdh5.16.2.p0.8/lib/hadoop-yarn/hadoop-yarn-server-resourcemanager.jar(list related jar)
+
+/usr/java/jdk1.7.0_67-cloudera/bin/jar -tvf  /opt/cloudera/parcels/CDH-5.16.2-1.cdh5.16.2.p0.8/lib/hadoop-yarn/hadoop-yarn-server-resourcemanager.jar | grep fifoscheduler
+
+/usr/java/jdk1.7.0_67-cloudera/bin/jar -tvf  /opt/cloudera/parcels/CDH-5.16.2-1.cdh5.16.2.p0.8/lib/hadoop-yarn/hadoop-yarn-server-resourcemanager.jar | grep fairscheduler
+
+/usr/java/jdk1.7.0_67-cloudera/bin/jar -tvf  /opt/cloudera/parcels/CDH-5.16.2-1.cdh5.16.2.p0.8/lib/hadoop-yarn/hadoop-yarn-server-resourcemanager.jar | grep capacityscheduler
+
+
+org/apache/hadoop/yarn/server/resourcemanager/scheduler/fifo/FifoScheduler.class
+
+org/apache/hadoop/yarn/server/resourcemanager/scheduler/fair/FairScheduler.class
+
+org/apache/hadoop/yarn/server/resourcemanager/scheduler/capacity/CapacityScheduler.class
+
+
+
+
+
+
+
+rm 'du -sh /opt/mapr/apiserver/logs/* | sort -n -r | head 20'
+
+yarn queue -status default
+
+yarn queue -status Engineering(queue name)
+
+find / -name "*hadoop*example.jar"
+
+hadoop jar /user/hdp/2.3.6.0-3796/hadoop-mapreduce/hadoop-mapreduce-examples-2.3.6.0-3796.jar pi 10 10
+
+hadoop jar /user/hdp/2.3.6.0-3796/hadoop-mapreduce/hadoop-mapreduce-examples-2.3.6.0-3796.jar -Dmapreduce.job.queuename=Marketing pi 10 10
+yarn queue -list default
+
+yarn logs -applicationId application-95788778465836578_23713 > application-95788778465836578_23713.log
+
+
+
+watch -n 1 kubectl get pod

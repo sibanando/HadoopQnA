@@ -1,0 +1,162 @@
+echo never > /sys/kernel/mm/transparent_hugepage/defrag
+echo never > /sys/kernel/mm/transparent_hugepage/enabled
+
+yum install mysql-connector-java* -y
+
+
+
+systemctl stop chronyd
+systemctl disable chronyd
+sudo yum -y install ntp
+chkconfig ntpd on
+service ntpd start
+
+
+
+rsyslogd -v
+service rsyslog status
+
+
+ulimit
+
+echo -e "\nDisabling SELinux"
+sudo sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+
+
+
+
+#Edit the file /etc/sysctl.conf and add the following line:
+sudo echo net.ipv4.tcp_retries2=5  >>  /etc/sysctl.conf  
+
+# Save the file and run:
+sysctl -p
+
+
+sudo sysctl vm.swappiness=1
+
+systemctl disable firewalld
+
+
+cat >> /etc/security/limits.conf <<EOL
+mapr - nofile 65536
+EOL
+
+
+cat >> /etc/security/limits.d/90-nproc.conf <<EOL
+mapr - nproc 64000
+EOL
+
+
+
+yum update -y
+yum install -y curl* device-mapper iputils libsysfs lvm2 nc nfs-utils ntp nss openssl python-devel sdparm syslinux sysstat wget yum-utils mlocate
+sudo updatedb
+
+
+
+curl -v -j -k -L -H "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u131-b11/d54c1d3a095b4ff2b6607d096fa80163/jdk-8u131-linux-x64.rpm > jdk-8u112-linux-x64.rpm
+
+rpm -ivh jdk-8u112-linux-x64.rpm
+
+
+echo "export JAVA_HOME=/usr/java/jdk1.8.0_131" >>  /etc/profile
+source /etc/profile
+
+rpm --import http://package.mapr.com/releases/pub/maprgpg.key
+
+
+
+
+#3: User ADD
+
+groupadd -g 5000 mapr
+useradd -g 5000 -u 5000 mapr
+useradd -m -u 5000 -g 5000 -G $(stat -c '%G' /etc/shadow) mapr
+echo "mapr:mapr" | chpasswd
+gpasswd -a mapr mapr
+echo 'mapr ALL =(ALL) NOPASSWD: ALL' >>  /etc/sudoers
+
+
+
+
+
+#4:  Password Less SSH
+
+file=/etc/ssh/sshd_config
+cp -p $file $file.old && awk ' $1=="PermitRootLogin" {$2="yes"} $1=="PasswordAuthentication" {$2="yes"} $1=="#PubkeyAuthentication" {$1="PubkeyAuthentication"} {print} ' $file.old > $file
+service sshd restart
+
+
+
+#5 updating repo list
+
+cat >>  /etc/yum.repos.d/maprtech.repo <<EOL
+
+
+[maprtech] 
+name=MapR Technologies 
+baseurl=http://package.mapr.com/releases/v6.0.1/redhat/
+enabled=1 
+gpgcheck=1
+
+
+
+[maprecosystem] 
+name=MapR Technologies
+baseurl=http://package.mapr.com/releases/MEP/MEP-5.0.0/redhat
+enabled=1 
+gpgcheck=1
+protect=1
+
+EOL
+
+
+
+
+
+yum install -y mapr-fileserver  mapr-zookeeper mapr-nodemanager 
+
+
+yum install -y mapr-fileserver mapr-cldb  mapr-resourcemanager mapr-webserver mapr-apiserver mapr-zookeeper mapr-nodemanager mapr-historyserver
+
+yum install -y mapr-fileserver  mapr-zookeeper mapr-nodemanager
+
+rpm -qa | grep mapr
+
+
+yum erase -y mapr-fileserver mapr-cldb  mapr-resourcemanager mapr-webserver mapr-apiserver mapr-zookeeper mapr-nodemanager mapr-historyserver
+yum erase -y mapr-fileserver  mapr-zookeeper mapr-nodemanager
+
+/opt/mapr/server/configure.sh -secure -genkeys -Z cldb.us-central1-a.c.siba-237806.internal:5181,maprslave01.us-central1-a.c.siba-237806.internal:5181,maprslave02.us-central1-a.c.siba-237806.internal:5181 -C cldb.us-central1-a.c.siba-237806.internal:7222 -RM cldb.us-central1-a.c.siba-237806.internal:8090 -N sibcluster -u mapr -g mapr -no-autostart
+
+/opt/mapr/server/configure.sh -secure -genkeys -Z cldb.us-central1-a.c.siba-237806.internal:5181,maprslave01.us-central1-a.c.siba-237806.internal:5181,maprslave02.us-central1-a.c.siba-237806.internal:5181 -C cldb.us-central1-a.c.siba-237806.internal:7222 -RM cldb.us-central1-a.c.siba-237806.internal:8090 -HS cldb.us-central1-a.c.siba-237806.internal  -N sibcluster -u mapr -g mapr -no-autostart
+
+/opt/mapr/server/configure.sh -secure  -Z cldb.us-central1-a.c.siba-237806.internal:5181,maprslave01.us-central1-a.c.siba-237806.internal:5181,maprslave02.us-central1-a.c.siba-237806.internal:5181 -C cldb.us-central1-a.c.siba-237806.internal:7222 -RM cldb.us-central1-a.c.siba-237806.internal:8090,maprslave01.us-central1-a.c.siba-237806.internal:8090 -HS cldb.us-central1-a.c.siba-237806.internal  -N sibcluster -u mapr -g mapr -no-autostart
+
+/opt/mapr/server/disksetup -F -W 3 /root/disk
+
+
+2019-08-31 18:17:31,044 INFO org.apache.hadoop.conf.Configuration: found resource core-site.xml at file:/opt/mapr/hadoop/hadoop-2.7.0/etc/hadoop/core-site.xml
+2019-08-31 18:17:32,220 INFO org.apache.hadoop.security.Groups: clearing userToGroupsMap cache
+2019-08-31 18:17:32,348 INFO org.apache.hadoop.conf.Configuration: found resource yarn-site.xml at file:/opt/mapr/hadoop/hadoop-2.7.0/etc/hadoop/yarn-site.xml
+2019-08-31 18:17:32,449 INFO org.apache.hadoop.service.AbstractService: Service ResourceManager failed in state INITED; cause: java.lang.IllegalArgumentException: Does not contain a valid host:port authority: cldb.us-central1-a.c.siba-237806.internal:8090:8032 (configuration property 'yarn.resourcemanager.address')
+
+systemctl stop mapr-zookeeper
+systemctl stop mapr-warden
+systemctl start mapr-zookeeper
+systemctl start mapr-warden
+systemctl status mapr-zookeeper
+systemctl status mapr-warden
+
+maprcli node services -name nodemanager -nodes cldb.us-central1-a.c.siba-237806.internal,maprslave01.us-central1-a.c.siba-237806.internal,maprslave02.us-central1-a.c.siba-237806.internal  -action restart
+
+maprcli node services -name resourcemanager -nodes cldb.us-central1-a.c.siba-237806.internal  -action restart
+
+/opt/mapr/server/configure.sh -R -RM cldb.us-central1-a.c.siba-237806.internal
+
+
+
+scp -rp ssl_keystore  ssl_keystore.p12 ssl_keystore.pem ssl_truststore ssl_truststore.p12 ssl_truststore.pem maprserverticket cldb.key root@10.128.15.200:/opt/mapr/conf
+scp -rp ssl_keystore  ssl_keystore.p12 ssl_keystore.pem ssl_truststore ssl_truststore.p12 ssl_truststore.pem maprserverticket cldb.key root@10.128.15.199:/opt/mapr/conf
+
+ 

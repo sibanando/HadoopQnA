@@ -1,0 +1,26 @@
+Hello,please try the steps below to adjust the hive heap size:
+
+	1. Modify hadoop-env.sh
+
+	Before:
+
+[mapr@node1 ~]$ cat /opt/mapr/hadoop/hadoop-2.7.0/etc/hadoop/hadoop-env.sh|grep HADOOP_CLIENT_OPTS export HADOOP_CLIENT_OPTS="-Xmx512m $HADOOP_CLIENT_OPTS" 
+[mapr@node1 ~]$
+
+	After:
+
+[mapr@node1 ~]$ cat /opt/mapr/hadoop/hadoop-2.7.0/etc/hadoop/hadoop-env.sh|grep HADOOP_CLIENT_OPTS #export HADOOP_CLIENT_OPTS="$HADOOP_CLIENT_OPTS" 
+[mapr@node1 ~]$
+
+	2. Copy hive-env.sh
+
+[mapr@node1 ~]$ cp /opt/mapr/hive/hive-2.1/conf/hive-env.sh.template /opt/mapr/hive/hive-2.1/conf/hive-env.sh
+
+	3. Modify hive-env.sh like the following
+
+if [ "$SERVICE" = "hiveserver2" ]; then #For hiveserver2 export HADOOP_HEAPSIZE=5120 fi if [ "$SERVICE" = "metastore" ]; then #For hive metastore export HADOOP_HEAPSIZE=1024 fi if [ "$SERVICE" = "cli" ]; then #For hive shell export HADOOP_HEAPSIZE=512 fi Regards,Ivan 
+
+
+103825.74
+107180.76
+

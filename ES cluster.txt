@@ -1,0 +1,28 @@
+esesslx0834.ss.sw.ericsson.se
+esesslx0994.ss.sw.ericsson.se
+esesslx0995.ss.sw.ericsson.se
+esesslx0996.ss.sw.ericsson.se
+esesslx0997.ss.sw.ericsson.se
+esesslx099.ss.sw.ericsson.se
+
+
+Er!css0n123
+
+
+truncate -s 0 escluster-2020-01-07-1.log
+find /var/log -type f -iname '*.log' -print0 | xargs -0 truncate -s0
+
+
+
+
+server.port: 5601
+server.host: "153.88.156.90"
+elasticsearch.url: "http://153.88.156.90:9200"
+
+
+30691041242
+profile
+Sibh@1234
+login
+Siba1234
+Yesudas@143

@@ -1,0 +1,85 @@
+Kerberos Prepare Server and Client for Setup and Configuration
+
+//In server
+yum -y install krb5-server krb5-libs krb5-workstation
+
+
+
+//In other hosts
+yum -y install krb5-libs krb5-workstation
+yum -y install openldap-clients
+
+
+vi /etc/krb5.conf
+
+//domain name change in 6 places
+
+//allow_weak_crypto = true
+
+# Configuration snippets may be placed in this directory as well
+includedir /etc/krb5.conf.d/
+
+[logging]
+ default = FILE:/var/log/krb5libs.log
+ kdc = FILE:/var/log/krb5kdc.log
+ admin_server = FILE:/var/log/kadmind.log
+
+[libdefaults]
+ dns_lookup_realm = false
+ ticket_lifetime = 24h
+ renew_lifetime = 7d
+ forwardable = true
+ default_tgs_enctypes = aes256-cts-hmac-sha1-96
+ default_tkt_enctypes = aes256-cts-hmac-sha1-96
+ permitted_enctypes = aes256-cts-hmac-sha1-96
+ udp_preference_limit = 1
+ rdns = false
+ pkinit_anchors = /etc/pki/tls/certs/ca-bundle.crt
+ default_realm = US-CENTRAL1-A.C.SIBA-237806.INTERNAL
+ default_ccache_name = KEYRING:persistent:%{uid}
+
+[realms]
+  US-CENTRAL1-A.C.SIBA-237806.INTERNAL = {
+  kdc = sl01.us-central1-a.c.siba-237806.internal
+  admin_server = sl01.us-central1-a.c.siba-237806.internal
+ }
+
+[domain_realm]
+# .example.com = EXAMPLE.COM
+# example.com = EXAMPLE.COM
+
+
+kdb5_util create -s
+
+ls /var/kerberos/krb5kdc/principal
+
+service krb5kdc restart
+service kadmin restart
+
+chkconfig krb5kdc on
+chkconfig kadmin on
+
+
+kadmin.local -q "addprinc admin/admin"
+
+
+vi /var/kerberos/krb5kdc/kadm5.acl
+
+*/admin@MUTHU4ALL.COM	*
+
+service krb5kdc restart
+service kadmin restart
+
+
+kadmin -p "admin/admin@MUTHU4ALL.COM"
+>>listprincs
+>>addprinc
+>>addprinc testuser
+
+modprinc -maxrenewlife 90day krbtgt/MUTHU4ALL.COM@MUTHU4ALL.COM
+
+
+
+
+
+

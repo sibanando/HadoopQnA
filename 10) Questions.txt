@@ -1,0 +1,356 @@
+201) What is function of jobtracker
+ans:- client submits the job to job tracker and it submits the work to the particular task tracker.
+
+202) Which two Apache frameworks can be used to automate HDFS backups?
+ Apache Falcon and Apache Oozie.
+
+203) Which data do we query using Hive?
+Answer:	Structured data.
+
+204) List some use cases of the Hadoop Ecosystem
+Text Mining, Graph Analysis, Semantic Analysis, Sentiment Analysis, Recommendation Systems, predictive analysis etc
+
+205) What is Pig?
+Answer:	It is a ETL tool and it’s a procedural language.
+
+206) Mention what are the data components used by Hadoop?
+Data components used by Hadoop are
+•	Pig
+•	Hive
+
+207) Have you configured HBase on a cluster, Are you working on a hbase?
+Ans;- no i havent got the opportunity to do it but i am ready to learn if i get an opportunity.
+
+208) What are component of hive ? 
+Ans:- user iterface, hive metastor, hiveql process engine, execution engine, hdfs or hbase.
+
+209) For Map what is the default heap memory
+Ans.  For Map the default heap memory is 2.5 GB & for reducer is 1.5 GB
+
+210) Suppose Hadoop spawned 100 tasks for a job and one of the task failed. What will Hadoop do?
+Ans. 
+- It will restart the task again on some other TaskTracker and only if the task fails more than four ( the default setting and can be changed) times will it kill the job.
+
+211) How to process diffeerent file by different mappers?
+Answer:
+- Multiplelnputs class supports mapreduce jobs that have multiple input path with a different InputFormat adn mapper for each path.
+
+212) Suppose CM is down,it will take 24hour for trouble shooting how will you monitor.
+Ans:We manage the alerts using ngios and also prepare the scripts for checking the status of various services runing in our cluster.
+
+213) Suppose a disk is down out of 10 what will you do.
+Ans: Not an issue if the disk is down from the same rack the other disk have replica of the data and client get his replica from other disk.
+
+214) How will you come to know that data node is down?
+Answer:	When a data node goes down you come to know on the monitoring dashboard of cloudera. Or by jps, or a unix bootstrap I guess.
+
+215) Sentry is used at user level or groups level?
+Ans:Sentry is used for User level. Allows the user to see only those tables and databases for which this user has privileges.
+
+217) What does /etc/init.d do?
+Ans. 
+- /etc /init.d specifies where daemons (services) are placed or to see the status of these daemons. 
+- It is very LINUX specific, and nothing to do with Hadoop.
+
+218) What are the most commonly defined input formats in Hadoop?
+Answer:
+The most common input formats defined in Hadoop are;
+•	TextInputFormat
+•	KeyValueInputFormat
+•	SequenceFileInputFormat
+
+219) For a job in Hadoop, is it possible to change the number of mappers to be created?
+No, it is not possible to change the number of mappers to be created. The number of mappers is determined by the number of input splits.
+
+220) Mention what is the next step after Mapper or MapTask?
+The next step after Mapper or MapTask is that the output of the Mapper are sorted, and partitions will be created for the output.
+
+221) Explain what does the conf.setMapper Class do ?
+Conf.setMapperclass  sets the mapper class and all the stuff related to map job such as reading data and generating a key-value pair out of the mapper
+
+222) Explain what is the purpose of RecordReader in Hadoop?
+In Hadoop, the RecordReader loads the data from its source and converts it into (key, value) pairs suitable for reading by the Mapper.
+
+223) What is iptables?
+A. internal firewall. Firewall is two types internal and external.
+Internal is iptables. (my own server)
+External is squid. (company)
+
+224) Can we search for files using wildcards?
+Ans. 
+- Yes. For example, to list all the files which begin with the letter a, you could use the ls command with the * wildcard &minu; hdfs dfs –ls a*
+
+225) Is YARN a replacement of Hadoop Map Reduce?
+YARN is not a replacement of Hadoop but it is a more powerful and efficient technology that supports Map Reduce and is also referred to as Hadoop 2.0 or Map Reduce 2.
+
+226) What is yarn capability ?
+Ans.Yarn opens up Hadoop to data-processing by separating concerns of cluster resource management from data processing. This makes a lot of new projects possible.
+
+227) While copying would you require 50070 port as it would take you directly to namenode
+If you are using 50070 it will directly point you to the UI of that cluster’s namenode, but if you have to use the HDFS part you have to use 8020.
+
+228)How to keep HDFS cluster balanced? (Yaad nahi)
+Answer:
+Balancer is a tool that tries to provide a balance to a certain threshold among data nodes by copying block data distribution across the cluster.
+
+229) How can i renew my ticket lifetime?
+
+Answer: 
+On all the KDC servers, set the following parameter under "[realms]" in /etc/krb5kdc/krb5.conf file and restarted the KDC daemon:
+ticket_lifetime = 2d  
+renew_lifetime = 7d
+
+230) What is command to install kdc server?
+Answer:
+a) Centos: yum install krb5-server krb5-libs krb5-workstation 
+b) Ubnutu: apt-get install krb5-server krb5-libs krb5-workstation
+
+231) Mention what daemons run on a master node and slave nodes?
+•	Daemons run on Master node is “NameNode”
+•	Daemons run on each Slave nodes are “Task Tracker” and “DataNode”
+
+232) Explain how can you debug Hadoop code?
+The popular methods for debugging Hadoop code are:
+•	By using web interface provided by Hadoop framework
+•	By using Counters
+
+233) What Is "fsck" And What Is Its Use?
+Answer :
+"fsck" is File System Check. FSCK is used to check the health of a Hadoop Filesystem. It generates a summarized report of the overall health of the filesystem. 
+
+234) Are Job Tracker and Task Tracker present on the same machine? 
+No, they are present on separate machines as Job Tracker is a single point of failure in Hadoop Map Reduce and if the Job Tracker goes down all the running Hadoop jobs will halt. 
+
+235) How do you define “block” in HDFS? What is the block size in Hadoop 1 and in Hadoop 2?
+Answer:
+A “block” is the minimum amount of data that can be read or written. 
+Hadoop 1 default block size: 64 MB
+Hadoop 2 default block size:  128 MB
+
+236) About openjdk, ibmjdk, sunjdk, oraclejdk/
+Answer:	
+•	Openjdk	-	Belongs to opensource community.
+•	Oraclejdk	-	Belongs to Oracle
+•	Sunjdk		-	Belongs to sun microsystems.
+•	Ibmjdk		-	Belongs to IBM
+
+====================================================================================================================================================
+
+101) What is Apache Hive? 
+It is a data warehouse infrastructure built on top of Hadoop. It was designed to enable users with database experience to analyze data using familiar SQL-based statements. 
+Hive includes support for SQL:2011 analytics. Hive and its SQL-based language enable an enterprise to utilize existing SQL skillsets to quickly derive value from a Hadoop deployment.
+
+102) What is Apache Flume? 
+It is a distributed, reliable, and available service that efficiently collects, aggregates, and moves streaming data. It is a distributed service because it can can be deployed across many systems. 
+The benefits of a distributed system include increased scalability and redundancy. It is reliable because its architecture and components are designed to prevent data loss. It is highly-available because it uses redundancy to limit downtime.
+
+103) What is Apache Sqoop? 
+It is a collection of related tools. The primary tools are the import and export tools. Writing your own scripts or MapReduce program to move data between Hadoop and a database or an enterprise data warehouse is an error prone and non-trivial task. 
+Sqoop import and export tools are designed to reliably transfer data between Hadoop and relational databases or enterprise data warehouse systems. 
+
+104) What is Apache Kafka? 
+It is a fast, scalable, durable, and fault-tolerant publish-subscribe messaging system. 
+Kafka is often used in place of traditional message brokers like Java Messaging Service (JMS) or Advance Message Queueing Protocol (AMQP) because of its higher throughput, reliability, and replication. 
+
+105) What is Apache Knox?
+It  is a perimeter gateway protecting a Hadoop cluster. It provides a single point of authentication into a Hadoop cluster.
+
+106) What is Apache Ranger?
+It is a centralized security framework offering fine-grained policy controls for HDFS, Hive, HBase, Knox, Storm, Kafka, and Solr. 
+Using the Ranger Console, security administrators can easily manage policies for access to files, directories, databases, tables, and columns. 
+These policies can be set for individual users or groups and then enforced within Hadoop.
+
+107) Explain what combiners is and when you should use a combiner in a MapReduce Job?
+To increase the efficiency of MapReduce Program, Combiners are used.  
+The amount of data can be reduced with the help of combiner’s that need to be transferred across to the reducers. 
+If the operation performed is commutative and associative you can use your reducer code as a combiner.  
+The execution of combiner is not guaranteed in Hadoop
+
+108) Mention what is the HadoopMapReduce APIs contract for a key and value class?
+For a key and value class, there are two HadoopMapReduce APIs contract
+•	The value must be defining the org.apache.hadoop.io.Writable interface
+•	The key must be defining the org.apache.hadoop.io.WritableComparable interface
+
+109) Have you worked in kafka, impala, cassandra, hbase ?
+Answer:	No. All I know about them is:
+1. Kafka: It is a messaging broadcast in a distributed cluster.
+2. Impala: It is a in memory solutions. 
+3. Cassandra: It is a distributed database like Teradata and hdfs
+4. HBase: It is a columnar store RDBMS lik
+
+110) Are you working in hive?
+A.
+# First we have use beeline we don't have use hive.
+# Second in our enviroment we use run all queries hue browser this is taken care by applications team and my job is secured that monitoring, backup, recovery, trobalshooting, governance,  security and secureing the cluster.
+# Producation is always on beeline never have on hive.
+
+112) Explain Name Node HA
+Ans. In each cluster, two separate machines are configured as NameNodes. In a working cluster, one of the NameNode machine is in the Active state, and the other is in the Standby state.
+The Active NameNode is responsible for all client operations in the cluster. The Standby NameNode maintains enough state to provide a fast failover. In order for the Standby node to keep its state synchronized with the Active node, both nodes communicate through a group of separate daemons called JournalNodes. The file system journal logged by the Active NameNode at the JournalNodes is consumed by the Standby NameNode to keep it’s file system namespace in sync with the Active.
+In order to provide a fast failover, it is also necessary that the Standby node have up-to-date information of the location of blocks in the cluster. DataNodes are configured with the location of both the NameNodes and send block location information and heartbeats to both NameNode machines.
+The ZooKeeper Failover Controller (ZKFC) is responsible for HA Monitoring of the NameNode service and for automatic failover when the Active NameNode is unavailable. There are two ZKFC processes – one on each NameNode machine. ZKFC uses the Zookeeper Service for coordination in determining which is the Active NameNode and in determining when to failover to the Standby NameNode.
+Quorum journal manager (QJM) in the NameNode writes file system journal logs to the journal nodes. A journal log is considered successfully written only when it is written to majority of the journal nodes. Only one of the Namenodes can achieve this quorum write. In the event of split-brain scenario this ensure that the file system metadata will not be corrupted by two active NameNodes.
+
+113) Tunning of yarn how will you tune yarn jobs.
+By setting some paramters for the yarn tuning we need to increase .
+
+Ans:1.yarn.nodemanager.resource.memory-mb
+2.yarn.nodemanager.resource.cpu-vcores
+3.mapreduce.map.memory.mb
+4.mapreduce.reduce.memory.mb
+
+Ans:Using RM resource portal we manages the Jobs along with counters shows the jobs are stucked or not .
+By setting some paramters for the yarn tuning we need to increase .
+
+114) I want to create one Kerberos  principal which will work same as HDFS user that means it will have a full access of cluster how will I create
+Ans: you have to create a user and make his group and supergroup hdfs.once done create a principle with that user name then that
+ user will have full authorisation as it is from usergroup of HDFS.
+
+115) What is namenode (HDFS) high availability?
+Answer:
+- There is a pair of namenodes in active-standby configuration.
+- In the event of the failure of the active name, the standby takes over its duties without a significant interruption.
+- The namenodes must use highly-available shared storage to share the edit log.
+- Edit logs are read by Standbynamenode when it takes the responsibility of Activenamenode.
+- Datanodes must send block reports to both namenodes because the block mappings.
+- Checkpointing is done by Standby namenode.
+
+116) Why do we use HDFS for applications having large data sets and not when there are lot of small files?
+Answer:
+- This is because Namenode is a very expensive high performance system, so it is not prudent to occupy the space in the Namenode by unnecessary amount of metadata that is generated for multiple small files. 
+- So, when there is a large amount of data in a single file, name node will occupy less space. Hence for getting optimized performance, HDFS supports large data sets instead of multiple small files.
+
+117) Why a secondary namenode can't act as namenode?
+Answer:
+- It is not design to act as namenode.
+- It keeps the recent fsimage of namenode.
+- But it can work as namenode after fsimage is merged with latest edits and blocks mapping is after communication with data nodes.
+- In case namenode fails suddenly and we are unable to access its edits, then latest updates over HDFS file structure will be lost as 
+   Secondary namenode stores only the recent fsiamge but not the edits
+
+118) How KMS works.?
+Ans:
+Hadoop Key Management Server (KMS) is a cryptographic key management server based on the Hadoop KeyProvider API. 
+It provides a KeyProvider implementation client that interacts with the KMS using the HTTP REST API. 
+Both the KMS and its client support HTTP SPNEGO Kerberos authentication and TLS/SSL-secured communication. 
+
+119) What key trustee server and KMS? explain the difference?
+
+Answer:
+a) Key trustee server: Cloudera Navigator Key Trustee Server is an enterprise-grade virtual safe-deposit box that stores and manages cryptographic keys and other security artifacts
+b) KMS: Hadoop Key Management Server (KMS) is a cryptographic key management server based on the Hadoop KeyProvider API.
+Difference:
+a) Cloudera strongly recommends using Key Trustee KMS in production environments to improve the security, durability, and scalability of your cryptographic key management
+b) For parcel-based installations, no additional action is required to install or upgrade the KMS. For package-based installations, you must install additional packages.
+
+120) Tell me about KMS how it works?
+Answer:
+Hadoop KMS is a cryptographic key management server based on Hadoop’s KeyProvider API.
+It provides a client and a server components which communicate over HTTP using a REST API.
+The client is a KeyProvider implementation interacts with the KMS using the KMS HTTP REST API.
+KMS and its client have built-in security and they support HTTP SPNEGO Kerberos authentication and HTTPS secure transport.
+KMS is a Java Jetty web-application.
+
+121) What is the command to create keytab
+ file?
+Answer:
+a) kadmin
+bash-3.00$ kadmin -p admin@EXAMPLE.COM
+kadmin: add_principal vemkd/cluster1@EXAMPLE.COM
+b) ktutil
+[root@test5~]#ktutil
+ktutil: add_entry -password -p vemkd/cluster1@ibm.com -k 1 -e des3-cbc-sha1-kd 
+Password for vemkd/cluster1@ibm.com:
+
+122) How would user read his/her encrypted data which is stored in encryption zone?
+Answer:
+- To encrypt a new file, the HDFS client requests a new EDEK from the NameNode. The NameNode then asks the KMS to decrypt it with the encryption zone's EZ key. 
+- This decryption results in a DEK, which is used to encrypt the file.
+ 
+- To decrypt a file, the HDFS client provides the NameNode with the file's EDEK and the version number of the EZ key that was used to generate the EDEK.
+- The NameNode requests the KMS to decrypt the file’s EDEK with the encryption zone's EZ key, which involves checking that the requesting client has permission to access that particular version of the EZ key.
+- Assuming decryption of the EDEK is successful, the client then uses this DEK to decrypt the file.
+
+123) What is kerberisation how it works?
+Answer:
+Kerberos is a network protocol that uses secret-key cryptography to authenticate client-server applications.
+Works:
+- When the user logins to machine. The principal, is sent to KDC server for login, and the KDC server will provide TGT in return
+- Kdc server searches the principal name in the database, on finding the principal, a TGT is generated by the KDC, which will be encrypted by the users key, and send back to the user.
+- When the user gets the TGT, the user decrypts the TGT with the help of KINIT.
+- The TGT recieved by the client from the KDC server will be stored in the cache for use for the session duration.
+- There will always be an expiration time set on the TGT offered by the KDC server, so that an expired TGT can never be used by an attacker.
+- Now the client has got TGT in hand. If suppose the client needs to communicate with some service on that network, the client will ask the KDC server, for a ticket for that specific service with the help of TGT
+
+124) What is KDC database ?
+Ans. KDC – Key Distribution Centre is an Authentication server and a ticket granting server, 
+when a client needs to access a resource on the server, the user credentials (password, Smart Card, biometrics) are presented to the Key Distribution Center (KDC) for authentication. 
+If the user credentials are successfully verified in the Key Distribution Center (KDC), Key Distribution Center (KDC) issues a Ticket Granting Ticket (TGT) to the client. 
+The Ticket Granting Ticket (TGT) is cached in the local machine for future use. The Ticket Granting Ticket (TGT) expires when the user disconnects or log off the network, or after it expires. 
+The default expiry time is one day (86400 seconds)
+
+125) What is keytab in Kerberos ?
+Ans. A keytab is a file containing pairs of Kerberos principals and encrypted keys. 
+Keytab files are commonly used to allow scripts to automatically authenticate various remote systems using Kerberos, without requiring human interaction.
+
+126) Explain About Kerberos?
+Answer:	
+Kerberos is a secure method for authenticating a request for a service in a computer network. 
+Kerberos was developed in the Athena Project at the Massachusetts Institute of Technology (MIT). 
+The name is taken from Greek mythology; Kerberos was a three-headed dog who guarded the gates of Hades.
+
+127) Kadmin used for?
+Answer:
+- kadmin provides for the maintenance of Kerberos principals, password policies, and service key tables (keytabs).
+- The remote kadmin client uses Kerberos to authenticate to kadmind using the service principal.
+- kadmin.local directly accesses the KDC database, it usually must be run directly on the master KDC with sufficient permissions to read the KDC database.
+- If the KDC database uses the LDAP database module, kadmin.local can be run on any host which can access the LDAP server.
+
+128) Security flow 
+Ans:https://community.hortonworks.com/articles/102957/hadoop-security-concepts.html  ---Refer the diagram and description is there
+Active Directory
+============
+Components
+Authentication Server (AS)
+Responsible for issuing Ticket Granting Tickets (TGT)
+Ticket Granting Server (TGS)
+Responsible for issuing service tickets
+Key Distribution Center (KDC)
+Talks with clients using KRB5 protocol
+AS + TGS
+LDAP Server
+Contains user and group information and talks with its clients using the LDAP protocol.
+
+Authentication
+===========
+Only a properly authenticated user (which can also be a service using another service) can communicate successfully with a kerberized Hadoop service. 
+Missing the required authentication, in this case by proving the identity of both user and the service, any communication will fail. 
+In a kerberized environment user authentication is provided via a ticket granting ticket (TGT).
+
+Technical Authentication Flow
+=======================
+User requests TGT from AS. This is done automatically upon login or using the kinit command.
+User receives TGT from AS.
+User sends request to a kerberized service.
+User gets service ticket from Ticket Granting Server. This is done automatically in the background when user sends a request to the service.
+User sends service a request to the service using the service ticket.
+
+129) What are the major differences between Hadoop 2 and Hadoop 3?
+Answer:
+Hadoop 2:
+•	At least supports Java version 6
+•	fault tolerance is achieved using replication
+•	Limited shell scripting
+•	YARN timeline service Introduced
+•	Default port was conflicting with Linux port
+•	Disk balancer is used
+•	Doesn’t support Microsoft file system
+
+Hadoop 3:
+•	At least supports Java version 8
+•	Fault tolerance is achieved using erasure(more efficient than replication since space sharing is enabled)
+•	Enhance shell scripting with bug fixing
+•	Improved YARN timeline service with more scalability and reliability
+•	Optimized port range
+•	Intra-DataNode balancing is added, which is invoked via the HDFS disk balancer CLI
+•	Supports Microsoft Azure data lake

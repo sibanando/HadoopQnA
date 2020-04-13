@@ -1,0 +1,1742 @@
+Kerberos Prepare Server and Client for Setup and Configuration
+
+//In server
+yum -y install krb5-server krb5-libs krb5-workstation
+
+
+
+//In other hosts
+yum -y install krb5-libs krb5-workstation
+
+
+yum -y install openldap-clients
+
+
+vi /etc/krb5.conf
+
+//domain name change in 6 places
+
+//allow_weak_crypto = true
+
+
+kdb5_util create -s
+
+ls /var/kerberos/krb5kdc/principal
+
+service krb5kdc restart
+service kadmin restart
+
+chkconfig krb5kdc on
+chkconfig kadmin on
+
+
+kadmin.local -q "addprinc admin/admin"
+
+
+vi /var/kerberos/krb5kdc/kadm5.acl
+
+*/admin@MUTHU4ALL.COM	*
+
+service krb5kdc restart
+service kadmin restart
+
+
+kadmin -p "admin/admin@MUTHU4ALL.COM"
+>>listprincs
+>>addprinc
+>>addprinc testuser
+
+kinit
+
+[logging]
+ default = FILE:/var/log/krb5libs.log
+ kdc = FILE:/var/log/krb5kdc.log
+ admin_server = FILE:/var/log/kadmind.log
+
+[libdefaults]
+ dns_lookup_realm = false
+ ticket_lifetime = 24h
+ renew_lifetime = 7d
+ forwardable = true
+ rdns = false
+ pkinit_anchors = /etc/pki/tls/certs/ca-bundle.crt
+ default_realm = SCDH.COM
+ default_ccache_name = KEYRING:persistent:%{uid}
+
+[realms]
+ SCDH.COM = {
+  kdc = cdh.us-central1-a.c.siba-237806.internal
+  admin_server = cdh.us-central1-a.c.siba-237806.internal
+ }
+
+[domain_realm]
+ .us-central1-a.c.siba-237806.internal= SCDH.COM
+ us-central1-a.c.siba-237806.internal = SCDH.COM
+[root@cdh ~]# cd /var/kerberos/krb5kdc/
+[root@cdh krb5kdc]# ll
+total 32
+-rw------- 1 root root    19 Nov 13 13:08 kadm5.acl
+-rw------- 1 root root   448 Nov 13 13:09 kdc.conf
+-rw------- 1 root root 16384 Nov 13 14:05 principal
+-rw------- 1 root root  8192 Nov 13 13:11 principal.kadm5
+-rw------- 1 root root     0 Nov 13 13:11 principal.kadm5.lock
+-rw------- 1 root root     0 Nov 13 14:05 principal.ok
+[root@cdh krb5kdc]# cat kdc.conf
+[kdcdefaults]
+ kdc_ports = 88
+ kdc_tcp_ports = 88
+
+[realms]
+ SCDH.COM = {
+  #master_key_type = aes256-cts
+  acl_file = /var/kerberos/krb5kdc/kadm5.acl
+  dict_file = /usr/share/dict/words
+  admin_keytab = /var/kerberos/krb5kdc/kadm5.keytab
+  supported_enctypes = aes256-cts:normal aes128-cts:normal des3-hmac-sha1:normal arcfour-hmac:normal camellia256-cts:normal camellia128-cts:normal des-hmac-sha1:normal des-cbc-md5:normal des-cbc-crc:normal
+ }
+[root@cdh krb5kdc]# clear
+You have new mail in /var/spool/mail/root
+[root@cdh krb5kdc]# ll
+total 60
+-rw------- 1 root root    19 Nov 13 13:08 kadm5.acl
+-rw------- 1 root root   448 Nov 13 13:09 kdc.conf
+-rw------- 1 root root 45056 Nov 13 14:21 principal
+-rw------- 1 root root  8192 Nov 13 13:11 principal.kadm5
+-rw------- 1 root root     0 Nov 13 13:11 principal.kadm5.lock
+-rw------- 1 root root     0 Nov 13 14:22 principal.ok
+[root@cdh krb5kdc]# su siba
+su: user siba does not exist
+[root@cdh krb5kdc]# hdfs dfs -ls /
+19/11/13 14:28:05 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:05 WARN ipc.Client: Exception encountered while connecting to the server : javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:05 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:05 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:05 WARN ipc.Client: Exception encountered while connecting to the server : javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:05 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:05 INFO retry.RetryInvocationHandler: Exception while invoking getFileInfo of class ClientNamenodeProtocolTranslatorPB over cdh.us-central1-a.c.siba-237806.internal/10.128.0.62:8020 after 1 fail over attempts. Trying to fail over immediately.
+java.io.IOException: Failed on local exception: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]; Host Details : local host is: "cdh.us-central1-a.c.siba-237806.internal/10.128.0.62"; destination host is: "cdh.us-central1-a.c.siba-237806.internal":8020;
+        at org.apache.hadoop.net.NetUtils.wrapException(NetUtils.java:772)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1508)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1441)
+        at org.apache.hadoop.ipc.ProtobufRpcEngine$Invoker.invoke(ProtobufRpcEngine.java:231)
+        at com.sun.proxy.$Proxy16.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.protocolPB.ClientNamenodeProtocolTranslatorPB.getFileInfo(ClientNamenodeProtocolTranslatorPB.java:788)
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.lang.reflect.Method.invoke(Method.java:606)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invokeMethod(RetryInvocationHandler.java:258)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invoke(RetryInvocationHandler.java:104)
+        at com.sun.proxy.$Proxy17.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.DFSClient.getFileInfo(DFSClient.java:2168)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1266)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.FileSystemLinkResolver.resolve(FileSystemLinkResolver.java:81)
+        at org.apache.hadoop.hdfs.DistributedFileSystem.getFileStatus(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.Globber.getFileStatus(Globber.java:64)
+        at org.apache.hadoop.fs.Globber.doGlob(Globber.java:285)
+        at org.apache.hadoop.fs.Globber.glob(Globber.java:151)
+        at org.apache.hadoop.fs.FileSystem.globStatus(FileSystem.java:1715)
+        at org.apache.hadoop.fs.shell.PathData.expandAsGlob(PathData.java:326)
+        at org.apache.hadoop.fs.shell.Command.expandArgument(Command.java:235)
+        at org.apache.hadoop.fs.shell.Command.expandArguments(Command.java:218)
+        at org.apache.hadoop.fs.shell.FsCommand.processRawArguments(FsCommand.java:102)
+        at org.apache.hadoop.fs.shell.Command.run(Command.java:165)
+        at org.apache.hadoop.fs.FsShell.run(FsShell.java:315)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:70)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:84)
+        at org.apache.hadoop.fs.FsShell.main(FsShell.java:372)
+Caused by: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at org.apache.hadoop.ipc.Client$Connection$1.run(Client.java:718)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.handleSaslConnectionFailure(Client.java:681)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:769)
+        at org.apache.hadoop.ipc.Client$Connection.access$3000(Client.java:396)
+        at org.apache.hadoop.ipc.Client.getConnection(Client.java:1557)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1480)
+        ... 29 more
+Caused by: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:212)
+        at org.apache.hadoop.security.SaslRpcClient.saslConnect(SaslRpcClient.java:413)
+        at org.apache.hadoop.ipc.Client$Connection.setupSaslConnection(Client.java:594)
+        at org.apache.hadoop.ipc.Client$Connection.access$2000(Client.java:396)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:761)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:757)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:756)
+        ... 32 more
+Caused by: GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)
+        at sun.security.jgss.krb5.Krb5InitCredential.getInstance(Krb5InitCredential.java:147)
+        at sun.security.jgss.krb5.Krb5MechFactory.getCredentialElement(Krb5MechFactory.java:121)
+        at sun.security.jgss.krb5.Krb5MechFactory.getMechanismContext(Krb5MechFactory.java:187)
+        at sun.security.jgss.GSSManagerImpl.getMechanismContext(GSSManagerImpl.java:223)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:212)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:179)
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:193)
+        ... 41 more
+19/11/13 14:28:05 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:05 WARN ipc.Client: Exception encountered while connecting to the server : javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:05 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:05 INFO retry.RetryInvocationHandler: Exception while invoking getFileInfo of class ClientNamenodeProtocolTranslatorPB over sl01.us-central1-a.c.siba-237806.internal/10.128.0.63:8020 after 2 fail over attempts. Trying to fail over immediately.
+java.io.IOException: Failed on local exception: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]; Host Details : local host is: "cdh.us-central1-a.c.siba-237806.internal/10.128.0.62"; destination host is: "sl01.us-central1-a.c.siba-237806.internal":8020;
+        at org.apache.hadoop.net.NetUtils.wrapException(NetUtils.java:772)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1508)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1441)
+        at org.apache.hadoop.ipc.ProtobufRpcEngine$Invoker.invoke(ProtobufRpcEngine.java:231)
+        at com.sun.proxy.$Proxy16.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.protocolPB.ClientNamenodeProtocolTranslatorPB.getFileInfo(ClientNamenodeProtocolTranslatorPB.java:788)
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.lang.reflect.Method.invoke(Method.java:606)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invokeMethod(RetryInvocationHandler.java:258)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invoke(RetryInvocationHandler.java:104)
+        at com.sun.proxy.$Proxy17.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.DFSClient.getFileInfo(DFSClient.java:2168)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1266)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.FileSystemLinkResolver.resolve(FileSystemLinkResolver.java:81)
+        at org.apache.hadoop.hdfs.DistributedFileSystem.getFileStatus(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.Globber.getFileStatus(Globber.java:64)
+        at org.apache.hadoop.fs.Globber.doGlob(Globber.java:285)
+        at org.apache.hadoop.fs.Globber.glob(Globber.java:151)
+        at org.apache.hadoop.fs.FileSystem.globStatus(FileSystem.java:1715)
+        at org.apache.hadoop.fs.shell.PathData.expandAsGlob(PathData.java:326)
+        at org.apache.hadoop.fs.shell.Command.expandArgument(Command.java:235)
+        at org.apache.hadoop.fs.shell.Command.expandArguments(Command.java:218)
+        at org.apache.hadoop.fs.shell.FsCommand.processRawArguments(FsCommand.java:102)
+        at org.apache.hadoop.fs.shell.Command.run(Command.java:165)
+        at org.apache.hadoop.fs.FsShell.run(FsShell.java:315)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:70)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:84)
+        at org.apache.hadoop.fs.FsShell.main(FsShell.java:372)
+Caused by: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at org.apache.hadoop.ipc.Client$Connection$1.run(Client.java:718)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.handleSaslConnectionFailure(Client.java:681)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:769)
+        at org.apache.hadoop.ipc.Client$Connection.access$3000(Client.java:396)
+        at org.apache.hadoop.ipc.Client.getConnection(Client.java:1557)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1480)
+        ... 29 more
+Caused by: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:212)
+        at org.apache.hadoop.security.SaslRpcClient.saslConnect(SaslRpcClient.java:413)
+        at org.apache.hadoop.ipc.Client$Connection.setupSaslConnection(Client.java:594)
+        at org.apache.hadoop.ipc.Client$Connection.access$2000(Client.java:396)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:761)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:757)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:756)
+        ... 32 more
+Caused by: GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)
+        at sun.security.jgss.krb5.Krb5InitCredential.getInstance(Krb5InitCredential.java:147)
+        at sun.security.jgss.krb5.Krb5MechFactory.getCredentialElement(Krb5MechFactory.java:121)
+        at sun.security.jgss.krb5.Krb5MechFactory.getMechanismContext(Krb5MechFactory.java:187)
+        at sun.security.jgss.GSSManagerImpl.getMechanismContext(GSSManagerImpl.java:223)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:212)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:179)
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:193)
+        ... 41 more
+19/11/13 14:28:05 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:05 WARN ipc.Client: Exception encountered while connecting to the server : javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:05 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:05 INFO retry.RetryInvocationHandler: Exception while invoking getFileInfo of class ClientNamenodeProtocolTranslatorPB over cdh.us-central1-a.c.siba-237806.internal/10.128.0.62:8020 after 3 fail over attempts. Trying to fail over immediately.
+java.io.IOException: Failed on local exception: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]; Host Details : local host is: "cdh.us-central1-a.c.siba-237806.internal/10.128.0.62"; destination host is: "cdh.us-central1-a.c.siba-237806.internal":8020;
+        at org.apache.hadoop.net.NetUtils.wrapException(NetUtils.java:772)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1508)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1441)
+        at org.apache.hadoop.ipc.ProtobufRpcEngine$Invoker.invoke(ProtobufRpcEngine.java:231)
+        at com.sun.proxy.$Proxy16.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.protocolPB.ClientNamenodeProtocolTranslatorPB.getFileInfo(ClientNamenodeProtocolTranslatorPB.java:788)
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.lang.reflect.Method.invoke(Method.java:606)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invokeMethod(RetryInvocationHandler.java:258)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invoke(RetryInvocationHandler.java:104)
+        at com.sun.proxy.$Proxy17.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.DFSClient.getFileInfo(DFSClient.java:2168)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1266)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.FileSystemLinkResolver.resolve(FileSystemLinkResolver.java:81)
+        at org.apache.hadoop.hdfs.DistributedFileSystem.getFileStatus(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.Globber.getFileStatus(Globber.java:64)
+        at org.apache.hadoop.fs.Globber.doGlob(Globber.java:285)
+        at org.apache.hadoop.fs.Globber.glob(Globber.java:151)
+        at org.apache.hadoop.fs.FileSystem.globStatus(FileSystem.java:1715)
+        at org.apache.hadoop.fs.shell.PathData.expandAsGlob(PathData.java:326)
+        at org.apache.hadoop.fs.shell.Command.expandArgument(Command.java:235)
+        at org.apache.hadoop.fs.shell.Command.expandArguments(Command.java:218)
+        at org.apache.hadoop.fs.shell.FsCommand.processRawArguments(FsCommand.java:102)
+        at org.apache.hadoop.fs.shell.Command.run(Command.java:165)
+        at org.apache.hadoop.fs.FsShell.run(FsShell.java:315)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:70)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:84)
+        at org.apache.hadoop.fs.FsShell.main(FsShell.java:372)
+Caused by: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at org.apache.hadoop.ipc.Client$Connection$1.run(Client.java:718)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.handleSaslConnectionFailure(Client.java:681)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:769)
+        at org.apache.hadoop.ipc.Client$Connection.access$3000(Client.java:396)
+        at org.apache.hadoop.ipc.Client.getConnection(Client.java:1557)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1480)
+        ... 29 more
+Caused by: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:212)
+        at org.apache.hadoop.security.SaslRpcClient.saslConnect(SaslRpcClient.java:413)
+        at org.apache.hadoop.ipc.Client$Connection.setupSaslConnection(Client.java:594)
+        at org.apache.hadoop.ipc.Client$Connection.access$2000(Client.java:396)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:761)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:757)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:756)
+        ... 32 more
+Caused by: GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)
+        at sun.security.jgss.krb5.Krb5InitCredential.getInstance(Krb5InitCredential.java:147)
+        at sun.security.jgss.krb5.Krb5MechFactory.getCredentialElement(Krb5MechFactory.java:121)
+        at sun.security.jgss.krb5.Krb5MechFactory.getMechanismContext(Krb5MechFactory.java:187)
+        at sun.security.jgss.GSSManagerImpl.getMechanismContext(GSSManagerImpl.java:223)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:212)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:179)
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:193)
+        ... 41 more
+19/11/13 14:28:05 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:05 WARN ipc.Client: Exception encountered while connecting to the server : javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:05 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:05 INFO retry.RetryInvocationHandler: Exception while invoking getFileInfo of class ClientNamenodeProtocolTranslatorPB over sl01.us-central1-a.c.siba-237806.internal/10.128.0.63:8020 after 4 fail over attempts. Trying to fail over immediately.
+java.io.IOException: Failed on local exception: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]; Host Details : local host is: "cdh.us-central1-a.c.siba-237806.internal/10.128.0.62"; destination host is: "sl01.us-central1-a.c.siba-237806.internal":8020;
+        at org.apache.hadoop.net.NetUtils.wrapException(NetUtils.java:772)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1508)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1441)
+        at org.apache.hadoop.ipc.ProtobufRpcEngine$Invoker.invoke(ProtobufRpcEngine.java:231)
+        at com.sun.proxy.$Proxy16.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.protocolPB.ClientNamenodeProtocolTranslatorPB.getFileInfo(ClientNamenodeProtocolTranslatorPB.java:788)
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.lang.reflect.Method.invoke(Method.java:606)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invokeMethod(RetryInvocationHandler.java:258)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invoke(RetryInvocationHandler.java:104)
+        at com.sun.proxy.$Proxy17.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.DFSClient.getFileInfo(DFSClient.java:2168)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1266)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.FileSystemLinkResolver.resolve(FileSystemLinkResolver.java:81)
+        at org.apache.hadoop.hdfs.DistributedFileSystem.getFileStatus(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.Globber.getFileStatus(Globber.java:64)
+        at org.apache.hadoop.fs.Globber.doGlob(Globber.java:285)
+        at org.apache.hadoop.fs.Globber.glob(Globber.java:151)
+        at org.apache.hadoop.fs.FileSystem.globStatus(FileSystem.java:1715)
+        at org.apache.hadoop.fs.shell.PathData.expandAsGlob(PathData.java:326)
+        at org.apache.hadoop.fs.shell.Command.expandArgument(Command.java:235)
+        at org.apache.hadoop.fs.shell.Command.expandArguments(Command.java:218)
+        at org.apache.hadoop.fs.shell.FsCommand.processRawArguments(FsCommand.java:102)
+        at org.apache.hadoop.fs.shell.Command.run(Command.java:165)
+        at org.apache.hadoop.fs.FsShell.run(FsShell.java:315)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:70)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:84)
+        at org.apache.hadoop.fs.FsShell.main(FsShell.java:372)
+Caused by: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at org.apache.hadoop.ipc.Client$Connection$1.run(Client.java:718)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.handleSaslConnectionFailure(Client.java:681)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:769)
+        at org.apache.hadoop.ipc.Client$Connection.access$3000(Client.java:396)
+        at org.apache.hadoop.ipc.Client.getConnection(Client.java:1557)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1480)
+        ... 29 more
+Caused by: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:212)
+        at org.apache.hadoop.security.SaslRpcClient.saslConnect(SaslRpcClient.java:413)
+        at org.apache.hadoop.ipc.Client$Connection.setupSaslConnection(Client.java:594)
+        at org.apache.hadoop.ipc.Client$Connection.access$2000(Client.java:396)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:761)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:757)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:756)
+        ... 32 more
+Caused by: GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)
+        at sun.security.jgss.krb5.Krb5InitCredential.getInstance(Krb5InitCredential.java:147)
+        at sun.security.jgss.krb5.Krb5MechFactory.getCredentialElement(Krb5MechFactory.java:121)
+        at sun.security.jgss.krb5.Krb5MechFactory.getMechanismContext(Krb5MechFactory.java:187)
+        at sun.security.jgss.GSSManagerImpl.getMechanismContext(GSSManagerImpl.java:223)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:212)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:179)
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:193)
+        ... 41 more
+19/11/13 14:28:05 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:05 WARN ipc.Client: Exception encountered while connecting to the server : javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:05 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:05 INFO retry.RetryInvocationHandler: Exception while invoking getFileInfo of class ClientNamenodeProtocolTranslatorPB over cdh.us-central1-a.c.siba-237806.internal/10.128.0.62:8020 after 5 fail over attempts. Trying to fail over immediately.
+java.io.IOException: Failed on local exception: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]; Host Details : local host is: "cdh.us-central1-a.c.siba-237806.internal/10.128.0.62"; destination host is: "cdh.us-central1-a.c.siba-237806.internal":8020;
+        at org.apache.hadoop.net.NetUtils.wrapException(NetUtils.java:772)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1508)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1441)
+        at org.apache.hadoop.ipc.ProtobufRpcEngine$Invoker.invoke(ProtobufRpcEngine.java:231)
+        at com.sun.proxy.$Proxy16.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.protocolPB.ClientNamenodeProtocolTranslatorPB.getFileInfo(ClientNamenodeProtocolTranslatorPB.java:788)
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.lang.reflect.Method.invoke(Method.java:606)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invokeMethod(RetryInvocationHandler.java:258)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invoke(RetryInvocationHandler.java:104)
+        at com.sun.proxy.$Proxy17.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.DFSClient.getFileInfo(DFSClient.java:2168)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1266)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.FileSystemLinkResolver.resolve(FileSystemLinkResolver.java:81)
+        at org.apache.hadoop.hdfs.DistributedFileSystem.getFileStatus(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.Globber.getFileStatus(Globber.java:64)
+        at org.apache.hadoop.fs.Globber.doGlob(Globber.java:285)
+        at org.apache.hadoop.fs.Globber.glob(Globber.java:151)
+        at org.apache.hadoop.fs.FileSystem.globStatus(FileSystem.java:1715)
+        at org.apache.hadoop.fs.shell.PathData.expandAsGlob(PathData.java:326)
+        at org.apache.hadoop.fs.shell.Command.expandArgument(Command.java:235)
+        at org.apache.hadoop.fs.shell.Command.expandArguments(Command.java:218)
+        at org.apache.hadoop.fs.shell.FsCommand.processRawArguments(FsCommand.java:102)
+        at org.apache.hadoop.fs.shell.Command.run(Command.java:165)
+        at org.apache.hadoop.fs.FsShell.run(FsShell.java:315)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:70)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:84)
+        at org.apache.hadoop.fs.FsShell.main(FsShell.java:372)
+Caused by: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at org.apache.hadoop.ipc.Client$Connection$1.run(Client.java:718)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.handleSaslConnectionFailure(Client.java:681)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:769)
+        at org.apache.hadoop.ipc.Client$Connection.access$3000(Client.java:396)
+        at org.apache.hadoop.ipc.Client.getConnection(Client.java:1557)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1480)
+        ... 29 more
+Caused by: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:212)
+        at org.apache.hadoop.security.SaslRpcClient.saslConnect(SaslRpcClient.java:413)
+        at org.apache.hadoop.ipc.Client$Connection.setupSaslConnection(Client.java:594)
+        at org.apache.hadoop.ipc.Client$Connection.access$2000(Client.java:396)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:761)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:757)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:756)
+        ... 32 more
+Caused by: GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)
+        at sun.security.jgss.krb5.Krb5InitCredential.getInstance(Krb5InitCredential.java:147)
+        at sun.security.jgss.krb5.Krb5MechFactory.getCredentialElement(Krb5MechFactory.java:121)
+        at sun.security.jgss.krb5.Krb5MechFactory.getMechanismContext(Krb5MechFactory.java:187)
+        at sun.security.jgss.GSSManagerImpl.getMechanismContext(GSSManagerImpl.java:223)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:212)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:179)
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:193)
+        ... 41 more
+19/11/13 14:28:05 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:05 WARN ipc.Client: Exception encountered while connecting to the server : javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:05 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:05 INFO retry.RetryInvocationHandler: Exception while invoking getFileInfo of class ClientNamenodeProtocolTranslatorPB over sl01.us-central1-a.c.siba-237806.internal/10.128.0.63:8020 after 6 fail over attempts. Trying to fail over immediately.
+java.io.IOException: Failed on local exception: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]; Host Details : local host is: "cdh.us-central1-a.c.siba-237806.internal/10.128.0.62"; destination host is: "sl01.us-central1-a.c.siba-237806.internal":8020;
+        at org.apache.hadoop.net.NetUtils.wrapException(NetUtils.java:772)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1508)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1441)
+        at org.apache.hadoop.ipc.ProtobufRpcEngine$Invoker.invoke(ProtobufRpcEngine.java:231)
+        at com.sun.proxy.$Proxy16.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.protocolPB.ClientNamenodeProtocolTranslatorPB.getFileInfo(ClientNamenodeProtocolTranslatorPB.java:788)
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.lang.reflect.Method.invoke(Method.java:606)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invokeMethod(RetryInvocationHandler.java:258)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invoke(RetryInvocationHandler.java:104)
+        at com.sun.proxy.$Proxy17.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.DFSClient.getFileInfo(DFSClient.java:2168)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1266)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.FileSystemLinkResolver.resolve(FileSystemLinkResolver.java:81)
+        at org.apache.hadoop.hdfs.DistributedFileSystem.getFileStatus(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.Globber.getFileStatus(Globber.java:64)
+        at org.apache.hadoop.fs.Globber.doGlob(Globber.java:285)
+        at org.apache.hadoop.fs.Globber.glob(Globber.java:151)
+        at org.apache.hadoop.fs.FileSystem.globStatus(FileSystem.java:1715)
+        at org.apache.hadoop.fs.shell.PathData.expandAsGlob(PathData.java:326)
+        at org.apache.hadoop.fs.shell.Command.expandArgument(Command.java:235)
+        at org.apache.hadoop.fs.shell.Command.expandArguments(Command.java:218)
+        at org.apache.hadoop.fs.shell.FsCommand.processRawArguments(FsCommand.java:102)
+        at org.apache.hadoop.fs.shell.Command.run(Command.java:165)
+        at org.apache.hadoop.fs.FsShell.run(FsShell.java:315)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:70)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:84)
+        at org.apache.hadoop.fs.FsShell.main(FsShell.java:372)
+Caused by: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at org.apache.hadoop.ipc.Client$Connection$1.run(Client.java:718)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.handleSaslConnectionFailure(Client.java:681)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:769)
+        at org.apache.hadoop.ipc.Client$Connection.access$3000(Client.java:396)
+        at org.apache.hadoop.ipc.Client.getConnection(Client.java:1557)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1480)
+        ... 29 more
+Caused by: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:212)
+        at org.apache.hadoop.security.SaslRpcClient.saslConnect(SaslRpcClient.java:413)
+        at org.apache.hadoop.ipc.Client$Connection.setupSaslConnection(Client.java:594)
+        at org.apache.hadoop.ipc.Client$Connection.access$2000(Client.java:396)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:761)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:757)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:756)
+        ... 32 more
+Caused by: GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)
+        at sun.security.jgss.krb5.Krb5InitCredential.getInstance(Krb5InitCredential.java:147)
+        at sun.security.jgss.krb5.Krb5MechFactory.getCredentialElement(Krb5MechFactory.java:121)
+        at sun.security.jgss.krb5.Krb5MechFactory.getMechanismContext(Krb5MechFactory.java:187)
+        at sun.security.jgss.GSSManagerImpl.getMechanismContext(GSSManagerImpl.java:223)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:212)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:179)
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:193)
+        ... 41 more
+19/11/13 14:28:05 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:05 WARN ipc.Client: Exception encountered while connecting to the server : javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:05 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:05 INFO retry.RetryInvocationHandler: Exception while invoking getFileInfo of class ClientNamenodeProtocolTranslatorPB over cdh.us-central1-a.c.siba-237806.internal/10.128.0.62:8020 after 7 fail over attempts. Trying to fail over immediately.
+java.io.IOException: Failed on local exception: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]; Host Details : local host is: "cdh.us-central1-a.c.siba-237806.internal/10.128.0.62"; destination host is: "cdh.us-central1-a.c.siba-237806.internal":8020;
+        at org.apache.hadoop.net.NetUtils.wrapException(NetUtils.java:772)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1508)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1441)
+        at org.apache.hadoop.ipc.ProtobufRpcEngine$Invoker.invoke(ProtobufRpcEngine.java:231)
+        at com.sun.proxy.$Proxy16.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.protocolPB.ClientNamenodeProtocolTranslatorPB.getFileInfo(ClientNamenodeProtocolTranslatorPB.java:788)
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.lang.reflect.Method.invoke(Method.java:606)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invokeMethod(RetryInvocationHandler.java:258)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invoke(RetryInvocationHandler.java:104)
+        at com.sun.proxy.$Proxy17.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.DFSClient.getFileInfo(DFSClient.java:2168)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1266)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.FileSystemLinkResolver.resolve(FileSystemLinkResolver.java:81)
+        at org.apache.hadoop.hdfs.DistributedFileSystem.getFileStatus(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.Globber.getFileStatus(Globber.java:64)
+        at org.apache.hadoop.fs.Globber.doGlob(Globber.java:285)
+        at org.apache.hadoop.fs.Globber.glob(Globber.java:151)
+        at org.apache.hadoop.fs.FileSystem.globStatus(FileSystem.java:1715)
+        at org.apache.hadoop.fs.shell.PathData.expandAsGlob(PathData.java:326)
+        at org.apache.hadoop.fs.shell.Command.expandArgument(Command.java:235)
+        at org.apache.hadoop.fs.shell.Command.expandArguments(Command.java:218)
+        at org.apache.hadoop.fs.shell.FsCommand.processRawArguments(FsCommand.java:102)
+        at org.apache.hadoop.fs.shell.Command.run(Command.java:165)
+        at org.apache.hadoop.fs.FsShell.run(FsShell.java:315)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:70)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:84)
+        at org.apache.hadoop.fs.FsShell.main(FsShell.java:372)
+Caused by: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at org.apache.hadoop.ipc.Client$Connection$1.run(Client.java:718)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.handleSaslConnectionFailure(Client.java:681)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:769)
+        at org.apache.hadoop.ipc.Client$Connection.access$3000(Client.java:396)
+        at org.apache.hadoop.ipc.Client.getConnection(Client.java:1557)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1480)
+        ... 29 more
+Caused by: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:212)
+        at org.apache.hadoop.security.SaslRpcClient.saslConnect(SaslRpcClient.java:413)
+        at org.apache.hadoop.ipc.Client$Connection.setupSaslConnection(Client.java:594)
+        at org.apache.hadoop.ipc.Client$Connection.access$2000(Client.java:396)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:761)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:757)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:756)
+        ... 32 more
+Caused by: GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)
+        at sun.security.jgss.krb5.Krb5InitCredential.getInstance(Krb5InitCredential.java:147)
+        at sun.security.jgss.krb5.Krb5MechFactory.getCredentialElement(Krb5MechFactory.java:121)
+        at sun.security.jgss.krb5.Krb5MechFactory.getMechanismContext(Krb5MechFactory.java:187)
+        at sun.security.jgss.GSSManagerImpl.getMechanismContext(GSSManagerImpl.java:223)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:212)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:179)
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:193)
+        ... 41 more
+19/11/13 14:28:06 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:06 WARN ipc.Client: Exception encountered while connecting to the server : javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:06 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:06 INFO retry.RetryInvocationHandler: Exception while invoking getFileInfo of class ClientNamenodeProtocolTranslatorPB over sl01.us-central1-a.c.siba-237806.internal/10.128.0.63:8020 after 8 fail over attempts. Trying to fail over immediately.
+java.io.IOException: Failed on local exception: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]; Host Details : local host is: "cdh.us-central1-a.c.siba-237806.internal/10.128.0.62"; destination host is: "sl01.us-central1-a.c.siba-237806.internal":8020;
+        at org.apache.hadoop.net.NetUtils.wrapException(NetUtils.java:772)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1508)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1441)
+        at org.apache.hadoop.ipc.ProtobufRpcEngine$Invoker.invoke(ProtobufRpcEngine.java:231)
+        at com.sun.proxy.$Proxy16.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.protocolPB.ClientNamenodeProtocolTranslatorPB.getFileInfo(ClientNamenodeProtocolTranslatorPB.java:788)
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.lang.reflect.Method.invoke(Method.java:606)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invokeMethod(RetryInvocationHandler.java:258)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invoke(RetryInvocationHandler.java:104)
+        at com.sun.proxy.$Proxy17.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.DFSClient.getFileInfo(DFSClient.java:2168)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1266)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.FileSystemLinkResolver.resolve(FileSystemLinkResolver.java:81)
+        at org.apache.hadoop.hdfs.DistributedFileSystem.getFileStatus(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.Globber.getFileStatus(Globber.java:64)
+        at org.apache.hadoop.fs.Globber.doGlob(Globber.java:285)
+        at org.apache.hadoop.fs.Globber.glob(Globber.java:151)
+        at org.apache.hadoop.fs.FileSystem.globStatus(FileSystem.java:1715)
+        at org.apache.hadoop.fs.shell.PathData.expandAsGlob(PathData.java:326)
+        at org.apache.hadoop.fs.shell.Command.expandArgument(Command.java:235)
+        at org.apache.hadoop.fs.shell.Command.expandArguments(Command.java:218)
+        at org.apache.hadoop.fs.shell.FsCommand.processRawArguments(FsCommand.java:102)
+        at org.apache.hadoop.fs.shell.Command.run(Command.java:165)
+        at org.apache.hadoop.fs.FsShell.run(FsShell.java:315)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:70)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:84)
+        at org.apache.hadoop.fs.FsShell.main(FsShell.java:372)
+Caused by: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at org.apache.hadoop.ipc.Client$Connection$1.run(Client.java:718)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.handleSaslConnectionFailure(Client.java:681)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:769)
+        at org.apache.hadoop.ipc.Client$Connection.access$3000(Client.java:396)
+        at org.apache.hadoop.ipc.Client.getConnection(Client.java:1557)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1480)
+        ... 29 more
+Caused by: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:212)
+        at org.apache.hadoop.security.SaslRpcClient.saslConnect(SaslRpcClient.java:413)
+        at org.apache.hadoop.ipc.Client$Connection.setupSaslConnection(Client.java:594)
+        at org.apache.hadoop.ipc.Client$Connection.access$2000(Client.java:396)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:761)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:757)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:756)
+        ... 32 more
+Caused by: GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)
+        at sun.security.jgss.krb5.Krb5InitCredential.getInstance(Krb5InitCredential.java:147)
+        at sun.security.jgss.krb5.Krb5MechFactory.getCredentialElement(Krb5MechFactory.java:121)
+        at sun.security.jgss.krb5.Krb5MechFactory.getMechanismContext(Krb5MechFactory.java:187)
+        at sun.security.jgss.GSSManagerImpl.getMechanismContext(GSSManagerImpl.java:223)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:212)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:179)
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:193)
+        ... 41 more
+19/11/13 14:28:06 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:06 WARN ipc.Client: Exception encountered while connecting to the server : javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:06 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:06 INFO retry.RetryInvocationHandler: Exception while invoking getFileInfo of class ClientNamenodeProtocolTranslatorPB over cdh.us-central1-a.c.siba-237806.internal/10.128.0.62:8020 after 9 fail over attempts. Trying to fail over immediately.
+java.io.IOException: Failed on local exception: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]; Host Details : local host is: "cdh.us-central1-a.c.siba-237806.internal/10.128.0.62"; destination host is: "cdh.us-central1-a.c.siba-237806.internal":8020;
+        at org.apache.hadoop.net.NetUtils.wrapException(NetUtils.java:772)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1508)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1441)
+        at org.apache.hadoop.ipc.ProtobufRpcEngine$Invoker.invoke(ProtobufRpcEngine.java:231)
+        at com.sun.proxy.$Proxy16.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.protocolPB.ClientNamenodeProtocolTranslatorPB.getFileInfo(ClientNamenodeProtocolTranslatorPB.java:788)
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.lang.reflect.Method.invoke(Method.java:606)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invokeMethod(RetryInvocationHandler.java:258)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invoke(RetryInvocationHandler.java:104)
+        at com.sun.proxy.$Proxy17.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.DFSClient.getFileInfo(DFSClient.java:2168)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1266)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.FileSystemLinkResolver.resolve(FileSystemLinkResolver.java:81)
+        at org.apache.hadoop.hdfs.DistributedFileSystem.getFileStatus(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.Globber.getFileStatus(Globber.java:64)
+        at org.apache.hadoop.fs.Globber.doGlob(Globber.java:285)
+        at org.apache.hadoop.fs.Globber.glob(Globber.java:151)
+        at org.apache.hadoop.fs.FileSystem.globStatus(FileSystem.java:1715)
+        at org.apache.hadoop.fs.shell.PathData.expandAsGlob(PathData.java:326)
+        at org.apache.hadoop.fs.shell.Command.expandArgument(Command.java:235)
+        at org.apache.hadoop.fs.shell.Command.expandArguments(Command.java:218)
+        at org.apache.hadoop.fs.shell.FsCommand.processRawArguments(FsCommand.java:102)
+        at org.apache.hadoop.fs.shell.Command.run(Command.java:165)
+        at org.apache.hadoop.fs.FsShell.run(FsShell.java:315)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:70)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:84)
+        at org.apache.hadoop.fs.FsShell.main(FsShell.java:372)
+Caused by: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at org.apache.hadoop.ipc.Client$Connection$1.run(Client.java:718)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.handleSaslConnectionFailure(Client.java:681)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:769)
+        at org.apache.hadoop.ipc.Client$Connection.access$3000(Client.java:396)
+        at org.apache.hadoop.ipc.Client.getConnection(Client.java:1557)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1480)
+        ... 29 more
+Caused by: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:212)
+        at org.apache.hadoop.security.SaslRpcClient.saslConnect(SaslRpcClient.java:413)
+        at org.apache.hadoop.ipc.Client$Connection.setupSaslConnection(Client.java:594)
+        at org.apache.hadoop.ipc.Client$Connection.access$2000(Client.java:396)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:761)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:757)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:756)
+        ... 32 more
+Caused by: GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)
+        at sun.security.jgss.krb5.Krb5InitCredential.getInstance(Krb5InitCredential.java:147)
+        at sun.security.jgss.krb5.Krb5MechFactory.getCredentialElement(Krb5MechFactory.java:121)
+        at sun.security.jgss.krb5.Krb5MechFactory.getMechanismContext(Krb5MechFactory.java:187)
+        at sun.security.jgss.GSSManagerImpl.getMechanismContext(GSSManagerImpl.java:223)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:212)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:179)
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:193)
+        ... 41 more
+19/11/13 14:28:06 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:06 WARN ipc.Client: Exception encountered while connecting to the server : javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:06 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:06 INFO retry.RetryInvocationHandler: Exception while invoking getFileInfo of class ClientNamenodeProtocolTranslatorPB over sl01.us-central1-a.c.siba-237806.internal/10.128.0.63:8020 after 10 fail over attempts. Trying to fail over immediately.
+java.io.IOException: Failed on local exception: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]; Host Details : local host is: "cdh.us-central1-a.c.siba-237806.internal/10.128.0.62"; destination host is: "sl01.us-central1-a.c.siba-237806.internal":8020;
+        at org.apache.hadoop.net.NetUtils.wrapException(NetUtils.java:772)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1508)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1441)
+        at org.apache.hadoop.ipc.ProtobufRpcEngine$Invoker.invoke(ProtobufRpcEngine.java:231)
+        at com.sun.proxy.$Proxy16.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.protocolPB.ClientNamenodeProtocolTranslatorPB.getFileInfo(ClientNamenodeProtocolTranslatorPB.java:788)
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.lang.reflect.Method.invoke(Method.java:606)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invokeMethod(RetryInvocationHandler.java:258)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invoke(RetryInvocationHandler.java:104)
+        at com.sun.proxy.$Proxy17.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.DFSClient.getFileInfo(DFSClient.java:2168)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1266)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.FileSystemLinkResolver.resolve(FileSystemLinkResolver.java:81)
+        at org.apache.hadoop.hdfs.DistributedFileSystem.getFileStatus(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.Globber.getFileStatus(Globber.java:64)
+        at org.apache.hadoop.fs.Globber.doGlob(Globber.java:285)
+        at org.apache.hadoop.fs.Globber.glob(Globber.java:151)
+        at org.apache.hadoop.fs.FileSystem.globStatus(FileSystem.java:1715)
+        at org.apache.hadoop.fs.shell.PathData.expandAsGlob(PathData.java:326)
+        at org.apache.hadoop.fs.shell.Command.expandArgument(Command.java:235)
+        at org.apache.hadoop.fs.shell.Command.expandArguments(Command.java:218)
+        at org.apache.hadoop.fs.shell.FsCommand.processRawArguments(FsCommand.java:102)
+        at org.apache.hadoop.fs.shell.Command.run(Command.java:165)
+        at org.apache.hadoop.fs.FsShell.run(FsShell.java:315)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:70)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:84)
+        at org.apache.hadoop.fs.FsShell.main(FsShell.java:372)
+Caused by: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at org.apache.hadoop.ipc.Client$Connection$1.run(Client.java:718)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.handleSaslConnectionFailure(Client.java:681)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:769)
+        at org.apache.hadoop.ipc.Client$Connection.access$3000(Client.java:396)
+        at org.apache.hadoop.ipc.Client.getConnection(Client.java:1557)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1480)
+        ... 29 more
+Caused by: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:212)
+        at org.apache.hadoop.security.SaslRpcClient.saslConnect(SaslRpcClient.java:413)
+        at org.apache.hadoop.ipc.Client$Connection.setupSaslConnection(Client.java:594)
+        at org.apache.hadoop.ipc.Client$Connection.access$2000(Client.java:396)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:761)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:757)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:756)
+        ... 32 more
+Caused by: GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)
+        at sun.security.jgss.krb5.Krb5InitCredential.getInstance(Krb5InitCredential.java:147)
+        at sun.security.jgss.krb5.Krb5MechFactory.getCredentialElement(Krb5MechFactory.java:121)
+        at sun.security.jgss.krb5.Krb5MechFactory.getMechanismContext(Krb5MechFactory.java:187)
+        at sun.security.jgss.GSSManagerImpl.getMechanismContext(GSSManagerImpl.java:223)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:212)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:179)
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:193)
+        ... 41 more
+19/11/13 14:28:07 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:07 WARN ipc.Client: Exception encountered while connecting to the server : javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:07 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:07 INFO retry.RetryInvocationHandler: Exception while invoking getFileInfo of class ClientNamenodeProtocolTranslatorPB over cdh.us-central1-a.c.siba-237806.internal/10.128.0.62:8020 after 11 fail over attempts. Trying to fail over immediately.
+java.io.IOException: Failed on local exception: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]; Host Details : local host is: "cdh.us-central1-a.c.siba-237806.internal/10.128.0.62"; destination host is: "cdh.us-central1-a.c.siba-237806.internal":8020;
+        at org.apache.hadoop.net.NetUtils.wrapException(NetUtils.java:772)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1508)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1441)
+        at org.apache.hadoop.ipc.ProtobufRpcEngine$Invoker.invoke(ProtobufRpcEngine.java:231)
+        at com.sun.proxy.$Proxy16.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.protocolPB.ClientNamenodeProtocolTranslatorPB.getFileInfo(ClientNamenodeProtocolTranslatorPB.java:788)
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.lang.reflect.Method.invoke(Method.java:606)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invokeMethod(RetryInvocationHandler.java:258)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invoke(RetryInvocationHandler.java:104)
+        at com.sun.proxy.$Proxy17.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.DFSClient.getFileInfo(DFSClient.java:2168)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1266)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.FileSystemLinkResolver.resolve(FileSystemLinkResolver.java:81)
+        at org.apache.hadoop.hdfs.DistributedFileSystem.getFileStatus(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.Globber.getFileStatus(Globber.java:64)
+        at org.apache.hadoop.fs.Globber.doGlob(Globber.java:285)
+        at org.apache.hadoop.fs.Globber.glob(Globber.java:151)
+        at org.apache.hadoop.fs.FileSystem.globStatus(FileSystem.java:1715)
+        at org.apache.hadoop.fs.shell.PathData.expandAsGlob(PathData.java:326)
+        at org.apache.hadoop.fs.shell.Command.expandArgument(Command.java:235)
+        at org.apache.hadoop.fs.shell.Command.expandArguments(Command.java:218)
+        at org.apache.hadoop.fs.shell.FsCommand.processRawArguments(FsCommand.java:102)
+        at org.apache.hadoop.fs.shell.Command.run(Command.java:165)
+        at org.apache.hadoop.fs.FsShell.run(FsShell.java:315)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:70)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:84)
+        at org.apache.hadoop.fs.FsShell.main(FsShell.java:372)
+Caused by: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at org.apache.hadoop.ipc.Client$Connection$1.run(Client.java:718)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.handleSaslConnectionFailure(Client.java:681)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:769)
+        at org.apache.hadoop.ipc.Client$Connection.access$3000(Client.java:396)
+        at org.apache.hadoop.ipc.Client.getConnection(Client.java:1557)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1480)
+        ... 29 more
+Caused by: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:212)
+        at org.apache.hadoop.security.SaslRpcClient.saslConnect(SaslRpcClient.java:413)
+        at org.apache.hadoop.ipc.Client$Connection.setupSaslConnection(Client.java:594)
+        at org.apache.hadoop.ipc.Client$Connection.access$2000(Client.java:396)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:761)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:757)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:756)
+        ... 32 more
+Caused by: GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)
+        at sun.security.jgss.krb5.Krb5InitCredential.getInstance(Krb5InitCredential.java:147)
+        at sun.security.jgss.krb5.Krb5MechFactory.getCredentialElement(Krb5MechFactory.java:121)
+        at sun.security.jgss.krb5.Krb5MechFactory.getMechanismContext(Krb5MechFactory.java:187)
+        at sun.security.jgss.GSSManagerImpl.getMechanismContext(GSSManagerImpl.java:223)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:212)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:179)
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:193)
+        ... 41 more
+19/11/13 14:28:07 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:07 WARN ipc.Client: Exception encountered while connecting to the server : javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:07 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:07 INFO retry.RetryInvocationHandler: Exception while invoking getFileInfo of class ClientNamenodeProtocolTranslatorPB over sl01.us-central1-a.c.siba-237806.internal/10.128.0.63:8020 after 12 fail over attempts. Trying to fail over immediately.
+java.io.IOException: Failed on local exception: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]; Host Details : local host is: "cdh.us-central1-a.c.siba-237806.internal/10.128.0.62"; destination host is: "sl01.us-central1-a.c.siba-237806.internal":8020;
+        at org.apache.hadoop.net.NetUtils.wrapException(NetUtils.java:772)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1508)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1441)
+        at org.apache.hadoop.ipc.ProtobufRpcEngine$Invoker.invoke(ProtobufRpcEngine.java:231)
+        at com.sun.proxy.$Proxy16.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.protocolPB.ClientNamenodeProtocolTranslatorPB.getFileInfo(ClientNamenodeProtocolTranslatorPB.java:788)
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.lang.reflect.Method.invoke(Method.java:606)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invokeMethod(RetryInvocationHandler.java:258)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invoke(RetryInvocationHandler.java:104)
+        at com.sun.proxy.$Proxy17.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.DFSClient.getFileInfo(DFSClient.java:2168)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1266)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.FileSystemLinkResolver.resolve(FileSystemLinkResolver.java:81)
+        at org.apache.hadoop.hdfs.DistributedFileSystem.getFileStatus(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.Globber.getFileStatus(Globber.java:64)
+        at org.apache.hadoop.fs.Globber.doGlob(Globber.java:285)
+        at org.apache.hadoop.fs.Globber.glob(Globber.java:151)
+        at org.apache.hadoop.fs.FileSystem.globStatus(FileSystem.java:1715)
+        at org.apache.hadoop.fs.shell.PathData.expandAsGlob(PathData.java:326)
+        at org.apache.hadoop.fs.shell.Command.expandArgument(Command.java:235)
+        at org.apache.hadoop.fs.shell.Command.expandArguments(Command.java:218)
+        at org.apache.hadoop.fs.shell.FsCommand.processRawArguments(FsCommand.java:102)
+        at org.apache.hadoop.fs.shell.Command.run(Command.java:165)
+        at org.apache.hadoop.fs.FsShell.run(FsShell.java:315)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:70)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:84)
+        at org.apache.hadoop.fs.FsShell.main(FsShell.java:372)
+Caused by: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at org.apache.hadoop.ipc.Client$Connection$1.run(Client.java:718)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.handleSaslConnectionFailure(Client.java:681)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:769)
+        at org.apache.hadoop.ipc.Client$Connection.access$3000(Client.java:396)
+        at org.apache.hadoop.ipc.Client.getConnection(Client.java:1557)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1480)
+        ... 29 more
+Caused by: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:212)
+        at org.apache.hadoop.security.SaslRpcClient.saslConnect(SaslRpcClient.java:413)
+        at org.apache.hadoop.ipc.Client$Connection.setupSaslConnection(Client.java:594)
+        at org.apache.hadoop.ipc.Client$Connection.access$2000(Client.java:396)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:761)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:757)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:756)
+        ... 32 more
+Caused by: GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)
+        at sun.security.jgss.krb5.Krb5InitCredential.getInstance(Krb5InitCredential.java:147)
+        at sun.security.jgss.krb5.Krb5MechFactory.getCredentialElement(Krb5MechFactory.java:121)
+        at sun.security.jgss.krb5.Krb5MechFactory.getMechanismContext(Krb5MechFactory.java:187)
+        at sun.security.jgss.GSSManagerImpl.getMechanismContext(GSSManagerImpl.java:223)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:212)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:179)
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:193)
+        ... 41 more
+19/11/13 14:28:07 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:07 WARN ipc.Client: Exception encountered while connecting to the server : javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:07 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:07 INFO retry.RetryInvocationHandler: Exception while invoking getFileInfo of class ClientNamenodeProtocolTranslatorPB over cdh.us-central1-a.c.siba-237806.internal/10.128.0.62:8020 after 13 fail over attempts. Trying to fail over immediately.
+java.io.IOException: Failed on local exception: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]; Host Details : local host is: "cdh.us-central1-a.c.siba-237806.internal/10.128.0.62"; destination host is: "cdh.us-central1-a.c.siba-237806.internal":8020;
+        at org.apache.hadoop.net.NetUtils.wrapException(NetUtils.java:772)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1508)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1441)
+        at org.apache.hadoop.ipc.ProtobufRpcEngine$Invoker.invoke(ProtobufRpcEngine.java:231)
+        at com.sun.proxy.$Proxy16.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.protocolPB.ClientNamenodeProtocolTranslatorPB.getFileInfo(ClientNamenodeProtocolTranslatorPB.java:788)
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.lang.reflect.Method.invoke(Method.java:606)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invokeMethod(RetryInvocationHandler.java:258)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invoke(RetryInvocationHandler.java:104)
+        at com.sun.proxy.$Proxy17.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.DFSClient.getFileInfo(DFSClient.java:2168)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1266)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.FileSystemLinkResolver.resolve(FileSystemLinkResolver.java:81)
+        at org.apache.hadoop.hdfs.DistributedFileSystem.getFileStatus(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.Globber.getFileStatus(Globber.java:64)
+        at org.apache.hadoop.fs.Globber.doGlob(Globber.java:285)
+        at org.apache.hadoop.fs.Globber.glob(Globber.java:151)
+        at org.apache.hadoop.fs.FileSystem.globStatus(FileSystem.java:1715)
+        at org.apache.hadoop.fs.shell.PathData.expandAsGlob(PathData.java:326)
+        at org.apache.hadoop.fs.shell.Command.expandArgument(Command.java:235)
+        at org.apache.hadoop.fs.shell.Command.expandArguments(Command.java:218)
+        at org.apache.hadoop.fs.shell.FsCommand.processRawArguments(FsCommand.java:102)
+        at org.apache.hadoop.fs.shell.Command.run(Command.java:165)
+        at org.apache.hadoop.fs.FsShell.run(FsShell.java:315)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:70)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:84)
+        at org.apache.hadoop.fs.FsShell.main(FsShell.java:372)
+Caused by: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at org.apache.hadoop.ipc.Client$Connection$1.run(Client.java:718)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.handleSaslConnectionFailure(Client.java:681)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:769)
+        at org.apache.hadoop.ipc.Client$Connection.access$3000(Client.java:396)
+        at org.apache.hadoop.ipc.Client.getConnection(Client.java:1557)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1480)
+        ... 29 more
+Caused by: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:212)
+        at org.apache.hadoop.security.SaslRpcClient.saslConnect(SaslRpcClient.java:413)
+        at org.apache.hadoop.ipc.Client$Connection.setupSaslConnection(Client.java:594)
+        at org.apache.hadoop.ipc.Client$Connection.access$2000(Client.java:396)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:761)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:757)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:756)
+        ... 32 more
+Caused by: GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)
+        at sun.security.jgss.krb5.Krb5InitCredential.getInstance(Krb5InitCredential.java:147)
+        at sun.security.jgss.krb5.Krb5MechFactory.getCredentialElement(Krb5MechFactory.java:121)
+        at sun.security.jgss.krb5.Krb5MechFactory.getMechanismContext(Krb5MechFactory.java:187)
+        at sun.security.jgss.GSSManagerImpl.getMechanismContext(GSSManagerImpl.java:223)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:212)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:179)
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:193)
+        ... 41 more
+19/11/13 14:28:07 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:07 WARN ipc.Client: Exception encountered while connecting to the server : javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:07 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:07 INFO retry.RetryInvocationHandler: Exception while invoking getFileInfo of class ClientNamenodeProtocolTranslatorPB over sl01.us-central1-a.c.siba-237806.internal/10.128.0.63:8020 after 14 fail over attempts. Trying to fail over immediately.
+java.io.IOException: Failed on local exception: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]; Host Details : local host is: "cdh.us-central1-a.c.siba-237806.internal/10.128.0.62"; destination host is: "sl01.us-central1-a.c.siba-237806.internal":8020;
+        at org.apache.hadoop.net.NetUtils.wrapException(NetUtils.java:772)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1508)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1441)
+        at org.apache.hadoop.ipc.ProtobufRpcEngine$Invoker.invoke(ProtobufRpcEngine.java:231)
+        at com.sun.proxy.$Proxy16.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.protocolPB.ClientNamenodeProtocolTranslatorPB.getFileInfo(ClientNamenodeProtocolTranslatorPB.java:788)
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.lang.reflect.Method.invoke(Method.java:606)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invokeMethod(RetryInvocationHandler.java:258)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invoke(RetryInvocationHandler.java:104)
+        at com.sun.proxy.$Proxy17.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.DFSClient.getFileInfo(DFSClient.java:2168)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1266)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.FileSystemLinkResolver.resolve(FileSystemLinkResolver.java:81)
+        at org.apache.hadoop.hdfs.DistributedFileSystem.getFileStatus(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.Globber.getFileStatus(Globber.java:64)
+        at org.apache.hadoop.fs.Globber.doGlob(Globber.java:285)
+        at org.apache.hadoop.fs.Globber.glob(Globber.java:151)
+        at org.apache.hadoop.fs.FileSystem.globStatus(FileSystem.java:1715)
+        at org.apache.hadoop.fs.shell.PathData.expandAsGlob(PathData.java:326)
+        at org.apache.hadoop.fs.shell.Command.expandArgument(Command.java:235)
+        at org.apache.hadoop.fs.shell.Command.expandArguments(Command.java:218)
+        at org.apache.hadoop.fs.shell.FsCommand.processRawArguments(FsCommand.java:102)
+        at org.apache.hadoop.fs.shell.Command.run(Command.java:165)
+        at org.apache.hadoop.fs.FsShell.run(FsShell.java:315)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:70)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:84)
+        at org.apache.hadoop.fs.FsShell.main(FsShell.java:372)
+Caused by: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at org.apache.hadoop.ipc.Client$Connection$1.run(Client.java:718)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.handleSaslConnectionFailure(Client.java:681)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:769)
+        at org.apache.hadoop.ipc.Client$Connection.access$3000(Client.java:396)
+        at org.apache.hadoop.ipc.Client.getConnection(Client.java:1557)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1480)
+        ... 29 more
+Caused by: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:212)
+        at org.apache.hadoop.security.SaslRpcClient.saslConnect(SaslRpcClient.java:413)
+        at org.apache.hadoop.ipc.Client$Connection.setupSaslConnection(Client.java:594)
+        at org.apache.hadoop.ipc.Client$Connection.access$2000(Client.java:396)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:761)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:757)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:756)
+        ... 32 more
+Caused by: GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)
+        at sun.security.jgss.krb5.Krb5InitCredential.getInstance(Krb5InitCredential.java:147)
+        at sun.security.jgss.krb5.Krb5MechFactory.getCredentialElement(Krb5MechFactory.java:121)
+        at sun.security.jgss.krb5.Krb5MechFactory.getMechanismContext(Krb5MechFactory.java:187)
+        at sun.security.jgss.GSSManagerImpl.getMechanismContext(GSSManagerImpl.java:223)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:212)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:179)
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:193)
+        ... 41 more
+19/11/13 14:28:07 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:07 WARN ipc.Client: Exception encountered while connecting to the server : javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+19/11/13 14:28:07 WARN security.UserGroupInformation: PriviledgedActionException as:root (auth:KERBEROS) cause:java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+ls: Failed on local exception: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]; Host Details : local host is: "cdh.us-central1-a.c.siba-237806.internal/10.128.0.62"; destination host is: "cdh.us-central1-a.c.siba-237806.internal":8020;
+[root@cdh krb5kdc]# ^C
+[root@cdh krb5kdc]# ll
+total 60
+-rw------- 1 root root    19 Nov 13 13:08 kadm5.acl
+-rw------- 1 root root   448 Nov 13 13:09 kdc.conf
+-rw------- 1 root root 45056 Nov 13 14:21 principal
+-rw------- 1 root root  8192 Nov 13 13:11 principal.kadm5
+-rw------- 1 root root     0 Nov 13 13:11 principal.kadm5.lock
+-rw------- 1 root root     0 Nov 13 14:22 principal.ok
+[root@cdh krb5kdc]# cd /var/run/cloudera-scm-agent/
+[root@cdh cloudera-scm-agent]# ll
+total 8
+drwxr-x--x  2 root         root          40 Nov 13 11:37 cgroups
+-rw-r--r--  1 root         root           4 Nov 13 11:37 cloudera-scm-agent.pid
+prw-------  1 root         root           0 Nov 13 14:24 events
+drwxr-x--x  2 cloudera-scm cloudera-scm 100 Nov 13 11:37 flood
+-rw-------  1 root         root         841 Nov 13 14:22 krb5cc_cm_agent_0
+drwxr-x--x 44 root         root         880 Nov 13 14:24 process
+drwxr-x--x  3 root         root         140 Nov 13 11:37 supervisor
+[root@cdh cloudera-scm-agent]# cd process/
+[root@cdh process]# ll
+total 0
+drwxr-x--x 3 mapred       hadoop       440 Nov 13 12:31 369-yarn-JOBHISTORY
+drwxr-x--x 3 yarn         hadoop       560 Nov 13 12:31 370-yarn-RESOURCEMANAGER
+drwxr-x--x 4 hive         hive         400 Nov 13 12:31 372-hive-HIVESERVER2
+drwxr-x--x 4 hive         hive         360 Nov 13 12:31 373-hive-HIVEMETASTORE
+drwxr-x--x 6 impala       impala       320 Nov 13 12:31 385-impala-CATALOGSERVER
+drwxr-x--x 4 impala       impala       260 Nov 13 12:31 386-impala-STATESTORE
+drwxr-x--x 3 cloudera-scm cloudera-scm 380 Nov 13 12:35 390-cloudera-mgmt-SERVICEMONITOR
+drwxr-x--x 3 cloudera-scm cloudera-scm 320 Nov 13 12:35 391-cloudera-mgmt-EVENTSERVER
+drwxr-x--x 3 cloudera-scm cloudera-scm 320 Nov 13 12:35 392-cloudera-mgmt-HOSTMONITOR
+drwxr-x--x 3 cloudera-scm cloudera-scm 300 Nov 13 14:21 393-cloudera-mgmt-ALERTPUBLISHER
+drwxr-x--x 3 hdfs         hdfs         420 Nov 13 12:30 394-hdfs-FAILOVERCONTROLLER
+drwxr-x--x 3 hdfs         hdfs         520 Nov 13 12:30 401-hdfs-NAMENODE
+drwxr-x--x 3 hdfs         hdfs         420 Nov 13 14:22 414-hdfs-FAILOVERCONTROLLER
+drwxr-x--x 3 hdfs         hdfs         520 Nov 13 14:22 421-hdfs-NAMENODE
+drwxr-x--x 3 hdfs         hdfs         540 Nov 13 14:22 424-hdfs-NAMENODE-nnRpcWait
+drwxr-x--x 3 mapred       hadoop       440 Nov 13 14:23 428-yarn-JOBHISTORY
+drwxr-x--x 3 yarn         hadoop       560 Nov 13 14:23 430-yarn-RESOURCEMANAGER
+drwxr-x--x 4 hive         hive         400 Nov 13 14:23 432-hive-HIVESERVER2
+drwxr-x--x 4 hive         hive         360 Nov 13 14:23 433-hive-HIVEMETASTORE
+drwxr-x--x 6 impala       impala       320 Nov 13 14:24 437-impala-CATALOGSERVER
+drwxr-x--x 4 impala       impala       260 Nov 13 14:24 439-impala-STATESTORE
+drwxr-x--x 3 cloudera-scm cloudera-scm 380 Nov 13 14:21 444-cloudera-mgmt-SERVICEMONITOR
+drwxr-x--x 3 cloudera-scm cloudera-scm 320 Nov 13 14:21 445-cloudera-mgmt-EVENTSERVER
+drwxr-x--x 3 cloudera-scm cloudera-scm 320 Nov 13 14:21 446-cloudera-mgmt-HOSTMONITOR
+drwxr-x--x 3 cloudera-scm cloudera-scm 380 Nov 13 14:22 452-cloudera-mgmt-SERVICEMONITOR
+drwxr-x--x 3 cloudera-scm cloudera-scm 300 Nov 13 14:21 453-cloudera-mgmt-EVENTSERVER
+drwxr-x--x 3 cloudera-scm cloudera-scm 320 Nov 13 14:22 454-cloudera-mgmt-HOSTMONITOR
+drwxr-x--x 3 cloudera-scm cloudera-scm 280 Nov 13 14:21 455-cloudera-mgmt-ALERTPUBLISHER
+drwxr-x--x 3 hdfs         hdfs         420 Nov 13 14:22 460-hdfs-FAILOVERCONTROLLER
+drwxr-x--x 3 hdfs         hdfs         520 Nov 13 14:22 466-hdfs-NAMENODE
+drwxr-x--x 3 hdfs         hdfs         540 Nov 13 14:23 469-hdfs-NAMENODE-nnRpcWait
+drwxr-x--x 3 mapred       hadoop       420 Nov 13 14:23 473-yarn-JOBHISTORY
+drwxr-x--x 3 yarn         hadoop       560 Nov 13 14:23 475-yarn-RESOURCEMANAGER
+drwxr-x--x 4 hive         hive         380 Nov 13 14:23 477-hive-HIVESERVER2
+drwxr-x--x 4 hive         hive         340 Nov 13 14:23 478-hive-HIVEMETASTORE
+drwxr-x--x 6 impala       impala       300 Nov 13 14:24 482-impala-CATALOGSERVER
+drwxr-x--x 4 impala       impala       240 Nov 13 14:24 484-impala-STATESTORE
+drwxr-xr-x 4 root         root         100 Nov 13 14:21 ccdeploy_etc_0
+drwxr-xr-x 4 root         root         100 Nov 13 14:21 ccdeploy_hadoop-conf_etchadoopconf.cloudera.hdfs_2503945306034236975
+drwxr-xr-x 4 root         root         100 Nov 13 14:21 ccdeploy_hadoop-conf_etchadoopconf.cloudera.yarn_-1313634808059968508
+drwxr-xr-x 4 root         root         100 Nov 13 14:21 ccdeploy_hive-conf_etchiveconf.cloudera.hive_-64407004128388657
+drwxr-xr-x 7 root         root         160 Nov 13 14:21 ccdeploy_spark-conf_etcsparkconf.cloudera.spark_on_yarn_2672606811085684937
+[root@cdh process]# ls -lrth
+total 0
+drwxr-x--x 3 hdfs         hdfs         520 Nov 13 12:30 401-hdfs-NAMENODE
+drwxr-x--x 3 hdfs         hdfs         420 Nov 13 12:30 394-hdfs-FAILOVERCONTROLLER
+drwxr-x--x 3 yarn         hadoop       560 Nov 13 12:31 370-yarn-RESOURCEMANAGER
+drwxr-x--x 3 mapred       hadoop       440 Nov 13 12:31 369-yarn-JOBHISTORY
+drwxr-x--x 4 hive         hive         400 Nov 13 12:31 372-hive-HIVESERVER2
+drwxr-x--x 4 hive         hive         360 Nov 13 12:31 373-hive-HIVEMETASTORE
+drwxr-x--x 4 impala       impala       260 Nov 13 12:31 386-impala-STATESTORE
+drwxr-x--x 6 impala       impala       320 Nov 13 12:31 385-impala-CATALOGSERVER
+drwxr-x--x 3 cloudera-scm cloudera-scm 320 Nov 13 12:35 392-cloudera-mgmt-HOSTMONITOR
+drwxr-x--x 3 cloudera-scm cloudera-scm 380 Nov 13 12:35 390-cloudera-mgmt-SERVICEMONITOR
+drwxr-x--x 3 cloudera-scm cloudera-scm 320 Nov 13 12:35 391-cloudera-mgmt-EVENTSERVER
+drwxr-xr-x 4 root         root         100 Nov 13 14:21 ccdeploy_etc_0
+drwxr-xr-x 4 root         root         100 Nov 13 14:21 ccdeploy_hadoop-conf_etchadoopconf.cloudera.yarn_-1313634808059968508
+drwxr-xr-x 7 root         root         160 Nov 13 14:21 ccdeploy_spark-conf_etcsparkconf.cloudera.spark_on_yarn_2672606811085684937
+drwxr-xr-x 4 root         root         100 Nov 13 14:21 ccdeploy_hive-conf_etchiveconf.cloudera.hive_-64407004128388657
+drwxr-xr-x 4 root         root         100 Nov 13 14:21 ccdeploy_hadoop-conf_etchadoopconf.cloudera.hdfs_2503945306034236975
+drwxr-x--x 3 cloudera-scm cloudera-scm 320 Nov 13 14:21 446-cloudera-mgmt-HOSTMONITOR
+drwxr-x--x 3 cloudera-scm cloudera-scm 320 Nov 13 14:21 445-cloudera-mgmt-EVENTSERVER
+drwxr-x--x 3 cloudera-scm cloudera-scm 380 Nov 13 14:21 444-cloudera-mgmt-SERVICEMONITOR
+drwxr-x--x 3 cloudera-scm cloudera-scm 300 Nov 13 14:21 393-cloudera-mgmt-ALERTPUBLISHER
+drwxr-x--x 3 cloudera-scm cloudera-scm 280 Nov 13 14:21 455-cloudera-mgmt-ALERTPUBLISHER
+drwxr-x--x 3 cloudera-scm cloudera-scm 300 Nov 13 14:21 453-cloudera-mgmt-EVENTSERVER
+drwxr-x--x 3 cloudera-scm cloudera-scm 320 Nov 13 14:22 454-cloudera-mgmt-HOSTMONITOR
+drwxr-x--x 3 cloudera-scm cloudera-scm 380 Nov 13 14:22 452-cloudera-mgmt-SERVICEMONITOR
+drwxr-x--x 3 hdfs         hdfs         540 Nov 13 14:22 424-hdfs-NAMENODE-nnRpcWait
+drwxr-x--x 3 hdfs         hdfs         520 Nov 13 14:22 421-hdfs-NAMENODE
+drwxr-x--x 3 hdfs         hdfs         420 Nov 13 14:22 414-hdfs-FAILOVERCONTROLLER
+drwxr-x--x 3 hdfs         hdfs         420 Nov 13 14:22 460-hdfs-FAILOVERCONTROLLER
+drwxr-x--x 3 hdfs         hdfs         520 Nov 13 14:22 466-hdfs-NAMENODE
+drwxr-x--x 3 hdfs         hdfs         540 Nov 13 14:23 469-hdfs-NAMENODE-nnRpcWait
+drwxr-x--x 3 yarn         hadoop       560 Nov 13 14:23 430-yarn-RESOURCEMANAGER
+drwxr-x--x 3 mapred       hadoop       440 Nov 13 14:23 428-yarn-JOBHISTORY
+drwxr-x--x 3 mapred       hadoop       420 Nov 13 14:23 473-yarn-JOBHISTORY
+drwxr-x--x 3 yarn         hadoop       560 Nov 13 14:23 475-yarn-RESOURCEMANAGER
+drwxr-x--x 4 hive         hive         360 Nov 13 14:23 433-hive-HIVEMETASTORE
+drwxr-x--x 4 hive         hive         400 Nov 13 14:23 432-hive-HIVESERVER2
+drwxr-x--x 4 hive         hive         380 Nov 13 14:23 477-hive-HIVESERVER2
+drwxr-x--x 4 hive         hive         340 Nov 13 14:23 478-hive-HIVEMETASTORE
+drwxr-x--x 4 impala       impala       260 Nov 13 14:24 439-impala-STATESTORE
+drwxr-x--x 6 impala       impala       320 Nov 13 14:24 437-impala-CATALOGSERVER
+drwxr-x--x 4 impala       impala       240 Nov 13 14:24 484-impala-STATESTORE
+drwxr-x--x 6 impala       impala       300 Nov 13 14:24 482-impala-CATALOGSERVER
+[root@cdh process]# cd 466-hdfs-NAMENODE
+[root@cdh 466-hdfs-NAMENODE]# ll
+total 92
+-rwxr----- 1 hdfs hdfs  2149 Nov 13 14:22 cloudera_manager_agent_fencer.py
+-rw-r----- 1 hdfs hdfs     0 Nov 13 14:22 cloudera_manager_agent_fencer_secret_key.txt
+-rw-r----- 1 hdfs hdfs   391 Nov 13 14:22 cloudera-monitor.properties
+-rw-r----- 1 hdfs hdfs   353 Nov 13 14:22 cloudera-stack-monitor.properties
+-rw------- 1 root root  9557 Nov 13 14:22 config.zip
+
+================
+-rw-r----- 1 hdfs hdfs  3740 Nov 13 14:22 core-site.xml
+-rw-r----- 1 hdfs hdfs   186 Nov 13 14:22 dfs_all_hosts.txt
+-rw-r----- 1 hdfs hdfs  1388 Nov 13 14:22 event-filter-rules.json
+-rw-r----- 1 hdfs hdfs     0 Nov 13 14:22 hadoop-metrics2.properties
+-rw-r----- 1 hdfs hdfs   515 Nov 13 14:22 hadoop-policy.xml
+-rw------- 1 hdfs hdfs  1602 Nov 13 14:22 hdfs.keytab
+-rw-r----- 1 hdfs hdfs 10151 Nov 13 14:22 hdfs-site.xml
+-rw-r----- 1 hdfs hdfs     0 Nov 13 14:22 http-auth-signature-secret
+-rw------- 1 hdfs hdfs   841 Nov 13 14:22 krb5cc_995
+-rw-r----- 1 hdfs hdfs  3318 Nov 13 14:22 log4j.properties
+drwxr-x--x 2 hdfs hdfs    80 Nov 13 14:22 logs
+-rw-r----- 1 hdfs hdfs     0 Nov 13 14:22 navigator.client.properties
+-rw------- 1 root root  4761 Nov 13 14:22 proc.json
+-rw-r----- 1 hdfs hdfs     0 Nov 13 14:22 redaction-rules.json
+-rw-r----- 1 hdfs hdfs   315 Nov 13 14:22 ssl-client.xml
+-rw-r----- 1 hdfs hdfs    98 Nov 13 14:22 ssl-server.xml
+-rw------- 1 root root  3697 Nov 13 14:22 supervisor.conf
+-rw-r----- 1 hdfs hdfs   587 Nov 13 14:22 topology.map
+-rwxr----- 1 hdfs hdfs  1627 Nov 13 14:22 topology.py
+[root@cdh 466-hdfs-NAMENODE]# klist -kt hdfs.keytab
+Keytab name: FILE:hdfs.keytab
+KVNO Timestamp           Principal
+---- ------------------- ------------------------------------------------------
+   2 11/13/2019 14:21:36 hdfs/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:36 hdfs/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:36 hdfs/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:36 hdfs/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:36 hdfs/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:36 hdfs/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:36 hdfs/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:36 hdfs/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:36 HTTP/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:36 HTTP/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:36 HTTP/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:36 HTTP/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:36 HTTP/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:36 HTTP/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:36 HTTP/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:36 HTTP/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+[root@cdh 466-hdfs-NAMENODE]# kinit -kt hdfs/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+kinit: Cannot determine realm for host (principal host/cdh.us-central1-a.c.siba-237806.internal@)
+[root@cdh 466-hdfs-NAMENODE]# kinit -kt hdfs.keytab hdfs/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+[root@cdh 466-hdfs-NAMENODE]# hdfs dfs -ls /
+Found 7 items
+-rw-r--r--   3 hdfs supergroup  104857600 2019-10-30 11:22 /large-file-100mb.txt
+-rw-r--r--   3 hdfs supergroup  104857600 2019-10-30 11:27 /large-file-100mb01.txt
+drwxr-xr-x   - hdfs supergroup          0 2019-08-22 10:02 /sibamine
+drwxrwxr-x   - solr solr                0 2019-08-09 11:01 /solr
+-rw-r--r--   3 hdfs supergroup          0 2019-11-13 06:57 /sssssss
+drwxrwxrwt   - hdfs supergroup          0 2019-11-08 12:22 /tmp
+drwxr-xr-x   - hdfs supergroup          0 2019-09-15 03:25 /user
+[root@cdh 466-hdfs-NAMENODE]# cp hdfs.keytab /
+[root@cdh 466-hdfs-NAMENODE]# cd /var/run/cloudera-scm-agent/
+[root@cdh cloudera-scm-agent]# ll
+total 8
+drwxr-x--x  2 root         root          40 Nov 13 11:37 cgroups
+-rw-r--r--  1 root         root           4 Nov 13 11:37 cloudera-scm-agent.pid
+prw-------  1 root         root           0 Nov 13 14:24 events
+drwxr-x--x  2 cloudera-scm cloudera-scm 100 Nov 13 11:37 flood
+-rw-------  1 root         root         841 Nov 13 14:33 krb5cc_cm_agent_0
+drwxr-x--x 44 root         root         880 Nov 13 14:24 process
+drwxr-x--x  3 root         root         140 Nov 13 11:37 supervisor
+[root@cdh cloudera-scm-agent]# cd process/
+[root@cdh process]# ll
+total 0
+drwxr-x--x 3 mapred       hadoop       440 Nov 13 12:31 369-yarn-JOBHISTORY
+drwxr-x--x 3 yarn         hadoop       560 Nov 13 12:31 370-yarn-RESOURCEMANAGER
+drwxr-x--x 4 hive         hive         400 Nov 13 12:31 372-hive-HIVESERVER2
+drwxr-x--x 4 hive         hive         360 Nov 13 12:31 373-hive-HIVEMETASTORE
+drwxr-x--x 6 impala       impala       320 Nov 13 12:31 385-impala-CATALOGSERVER
+drwxr-x--x 4 impala       impala       260 Nov 13 12:31 386-impala-STATESTORE
+drwxr-x--x 3 cloudera-scm cloudera-scm 380 Nov 13 12:35 390-cloudera-mgmt-SERVICEMONITOR
+drwxr-x--x 3 cloudera-scm cloudera-scm 320 Nov 13 12:35 391-cloudera-mgmt-EVENTSERVER
+drwxr-x--x 3 cloudera-scm cloudera-scm 320 Nov 13 12:35 392-cloudera-mgmt-HOSTMONITOR
+drwxr-x--x 3 cloudera-scm cloudera-scm 300 Nov 13 14:21 393-cloudera-mgmt-ALERTPUBLISHER
+drwxr-x--x 3 hdfs         hdfs         420 Nov 13 12:30 394-hdfs-FAILOVERCONTROLLER
+drwxr-x--x 3 hdfs         hdfs         520 Nov 13 12:30 401-hdfs-NAMENODE
+drwxr-x--x 3 hdfs         hdfs         420 Nov 13 14:22 414-hdfs-FAILOVERCONTROLLER
+drwxr-x--x 3 hdfs         hdfs         520 Nov 13 14:22 421-hdfs-NAMENODE
+drwxr-x--x 3 hdfs         hdfs         540 Nov 13 14:22 424-hdfs-NAMENODE-nnRpcWait
+drwxr-x--x 3 mapred       hadoop       440 Nov 13 14:23 428-yarn-JOBHISTORY
+drwxr-x--x 3 yarn         hadoop       560 Nov 13 14:23 430-yarn-RESOURCEMANAGER
+drwxr-x--x 4 hive         hive         400 Nov 13 14:23 432-hive-HIVESERVER2
+drwxr-x--x 4 hive         hive         360 Nov 13 14:23 433-hive-HIVEMETASTORE
+drwxr-x--x 6 impala       impala       320 Nov 13 14:24 437-impala-CATALOGSERVER
+drwxr-x--x 4 impala       impala       260 Nov 13 14:24 439-impala-STATESTORE
+drwxr-x--x 3 cloudera-scm cloudera-scm 380 Nov 13 14:21 444-cloudera-mgmt-SERVICEMONITOR
+drwxr-x--x 3 cloudera-scm cloudera-scm 320 Nov 13 14:21 445-cloudera-mgmt-EVENTSERVER
+drwxr-x--x 3 cloudera-scm cloudera-scm 320 Nov 13 14:21 446-cloudera-mgmt-HOSTMONITOR
+drwxr-x--x 3 cloudera-scm cloudera-scm 380 Nov 13 14:22 452-cloudera-mgmt-SERVICEMONITOR
+drwxr-x--x 3 cloudera-scm cloudera-scm 300 Nov 13 14:21 453-cloudera-mgmt-EVENTSERVER
+drwxr-x--x 3 cloudera-scm cloudera-scm 320 Nov 13 14:22 454-cloudera-mgmt-HOSTMONITOR
+drwxr-x--x 3 cloudera-scm cloudera-scm 280 Nov 13 14:21 455-cloudera-mgmt-ALERTPUBLISHER
+drwxr-x--x 3 hdfs         hdfs         420 Nov 13 14:22 460-hdfs-FAILOVERCONTROLLER
+drwxr-x--x 3 hdfs         hdfs         520 Nov 13 14:22 466-hdfs-NAMENODE
+drwxr-x--x 3 hdfs         hdfs         540 Nov 13 14:23 469-hdfs-NAMENODE-nnRpcWait
+drwxr-x--x 3 mapred       hadoop       420 Nov 13 14:23 473-yarn-JOBHISTORY
+drwxr-x--x 3 yarn         hadoop       560 Nov 13 14:23 475-yarn-RESOURCEMANAGER
+drwxr-x--x 4 hive         hive         380 Nov 13 14:23 477-hive-HIVESERVER2
+drwxr-x--x 4 hive         hive         340 Nov 13 14:23 478-hive-HIVEMETASTORE
+drwxr-x--x 6 impala       impala       300 Nov 13 14:24 482-impala-CATALOGSERVER
+drwxr-x--x 4 impala       impala       240 Nov 13 14:24 484-impala-STATESTORE
+drwxr-xr-x 4 root         root         100 Nov 13 14:21 ccdeploy_etc_0
+drwxr-xr-x 4 root         root         100 Nov 13 14:21 ccdeploy_hadoop-conf_etchadoopconf.cloudera.hdfs_2503945306034236975
+drwxr-xr-x 4 root         root         100 Nov 13 14:21 ccdeploy_hadoop-conf_etchadoopconf.cloudera.yarn_-1313634808059968508
+drwxr-xr-x 4 root         root         100 Nov 13 14:21 ccdeploy_hive-conf_etchiveconf.cloudera.hive_-64407004128388657
+drwxr-xr-x 7 root         root         160 Nov 13 14:21 ccdeploy_spark-conf_etcsparkconf.cloudera.spark_on_yarn_2672606811085684937
+[root@cdh process]# ls -lrth
+total 0
+drwxr-x--x 3 hdfs         hdfs         520 Nov 13 12:30 401-hdfs-NAMENODE
+drwxr-x--x 3 hdfs         hdfs         420 Nov 13 12:30 394-hdfs-FAILOVERCONTROLLER
+drwxr-x--x 3 yarn         hadoop       560 Nov 13 12:31 370-yarn-RESOURCEMANAGER
+drwxr-x--x 3 mapred       hadoop       440 Nov 13 12:31 369-yarn-JOBHISTORY
+drwxr-x--x 4 hive         hive         400 Nov 13 12:31 372-hive-HIVESERVER2
+drwxr-x--x 4 hive         hive         360 Nov 13 12:31 373-hive-HIVEMETASTORE
+drwxr-x--x 4 impala       impala       260 Nov 13 12:31 386-impala-STATESTORE
+drwxr-x--x 6 impala       impala       320 Nov 13 12:31 385-impala-CATALOGSERVER
+drwxr-x--x 3 cloudera-scm cloudera-scm 320 Nov 13 12:35 392-cloudera-mgmt-HOSTMONITOR
+drwxr-x--x 3 cloudera-scm cloudera-scm 380 Nov 13 12:35 390-cloudera-mgmt-SERVICEMONITOR
+drwxr-x--x 3 cloudera-scm cloudera-scm 320 Nov 13 12:35 391-cloudera-mgmt-EVENTSERVER
+drwxr-xr-x 4 root         root         100 Nov 13 14:21 ccdeploy_etc_0
+drwxr-xr-x 4 root         root         100 Nov 13 14:21 ccdeploy_hadoop-conf_etchadoopconf.cloudera.yarn_-1313634808059968508
+drwxr-xr-x 7 root         root         160 Nov 13 14:21 ccdeploy_spark-conf_etcsparkconf.cloudera.spark_on_yarn_2672606811085684937
+drwxr-xr-x 4 root         root         100 Nov 13 14:21 ccdeploy_hive-conf_etchiveconf.cloudera.hive_-64407004128388657
+drwxr-xr-x 4 root         root         100 Nov 13 14:21 ccdeploy_hadoop-conf_etchadoopconf.cloudera.hdfs_2503945306034236975
+drwxr-x--x 3 cloudera-scm cloudera-scm 320 Nov 13 14:21 446-cloudera-mgmt-HOSTMONITOR
+drwxr-x--x 3 cloudera-scm cloudera-scm 320 Nov 13 14:21 445-cloudera-mgmt-EVENTSERVER
+drwxr-x--x 3 cloudera-scm cloudera-scm 380 Nov 13 14:21 444-cloudera-mgmt-SERVICEMONITOR
+drwxr-x--x 3 cloudera-scm cloudera-scm 300 Nov 13 14:21 393-cloudera-mgmt-ALERTPUBLISHER
+drwxr-x--x 3 cloudera-scm cloudera-scm 280 Nov 13 14:21 455-cloudera-mgmt-ALERTPUBLISHER
+drwxr-x--x 3 cloudera-scm cloudera-scm 300 Nov 13 14:21 453-cloudera-mgmt-EVENTSERVER
+drwxr-x--x 3 cloudera-scm cloudera-scm 320 Nov 13 14:22 454-cloudera-mgmt-HOSTMONITOR
+drwxr-x--x 3 cloudera-scm cloudera-scm 380 Nov 13 14:22 452-cloudera-mgmt-SERVICEMONITOR
+drwxr-x--x 3 hdfs         hdfs         540 Nov 13 14:22 424-hdfs-NAMENODE-nnRpcWait
+drwxr-x--x 3 hdfs         hdfs         520 Nov 13 14:22 421-hdfs-NAMENODE
+drwxr-x--x 3 hdfs         hdfs         420 Nov 13 14:22 414-hdfs-FAILOVERCONTROLLER
+drwxr-x--x 3 hdfs         hdfs         420 Nov 13 14:22 460-hdfs-FAILOVERCONTROLLER
+drwxr-x--x 3 hdfs         hdfs         520 Nov 13 14:22 466-hdfs-NAMENODE
+drwxr-x--x 3 hdfs         hdfs         540 Nov 13 14:23 469-hdfs-NAMENODE-nnRpcWait
+drwxr-x--x 3 yarn         hadoop       560 Nov 13 14:23 430-yarn-RESOURCEMANAGER
+drwxr-x--x 3 mapred       hadoop       440 Nov 13 14:23 428-yarn-JOBHISTORY
+drwxr-x--x 3 mapred       hadoop       420 Nov 13 14:23 473-yarn-JOBHISTORY
+drwxr-x--x 3 yarn         hadoop       560 Nov 13 14:23 475-yarn-RESOURCEMANAGER
+drwxr-x--x 4 hive         hive         360 Nov 13 14:23 433-hive-HIVEMETASTORE
+drwxr-x--x 4 hive         hive         400 Nov 13 14:23 432-hive-HIVESERVER2
+drwxr-x--x 4 hive         hive         380 Nov 13 14:23 477-hive-HIVESERVER2
+drwxr-x--x 4 hive         hive         340 Nov 13 14:23 478-hive-HIVEMETASTORE
+drwxr-x--x 4 impala       impala       260 Nov 13 14:24 439-impala-STATESTORE
+drwxr-x--x 6 impala       impala       320 Nov 13 14:24 437-impala-CATALOGSERVER
+drwxr-x--x 4 impala       impala       240 Nov 13 14:24 484-impala-STATESTORE
+drwxr-x--x 6 impala       impala       300 Nov 13 14:24 482-impala-CATALOGSERVER
+[root@cdh process]# cd 477-hive-HIVESERVER2
+[root@cdh 477-hive-HIVESERVER2]# ll
+total 140
+-rw-r----- 1 hive hive   344 Nov 13 14:23 cloudera-monitor.properties
+-rw-r----- 1 hive hive   352 Nov 13 14:23 cloudera-stack-monitor.properties
+-rw------- 1 root root 18185 Nov 13 14:23 config.zip
+-rw-r----- 1 hive hive  3852 Nov 13 14:23 core-site.xml
+-rw-r----- 1 hive hive   635 Nov 13 14:23 fair-scheduler.xml
+-rw------- 1 hive hive  1602 Nov 13 14:23 hive.keytab
+-rw-r----- 1 hive hive   884 Nov 13 14:23 hive-log4j.properties
+-rw-r----- 1 hive hive  9938 Nov 13 14:23 hive-site.xml
+drwxr-x--x 2 hive hive    80 Nov 13 14:23 logs
+-rw-r----- 1 hive hive     0 Nov 13 14:23 navigator.client.properties
+-rw-r----- 1 hive hive     0 Nov 13 14:23 navigator.lineage.client.properties
+-rw------- 1 root root  3450 Nov 13 14:23 proc.json
+-rw-r----- 1 hive hive     0 Nov 13 14:23 redaction-rules.json
+-rw-r----- 1 hive hive   747 Nov 13 14:23 sentry-site.xml
+-rw-r----- 1 hive hive 73186 Nov 13 14:23 service-metrics.properties
+-rw------- 1 root root  3609 Nov 13 14:23 supervisor.conf
+drwxr-x--x 2 hive hive   220 Nov 13 14:23 yarn-conf
+[root@cdh 477-hive-HIVESERVER2]# hive
+
+Logging initialized using configuration in jar:file:/opt/cloudera/parcels/CDH-5.16.2-1.cdh5.16.2.p0.8/jars/hive-common-1.1.0-cdh5.16.2.jar!/hive-log4j.properties
+WARNING: Hive CLI is deprecated and migration to Beeline is recommended.
+hive> ^C^C[root@cdh 477-hive-HIVESERVER2]# ^C
+[root@cdh 477-hive-HIVESERVER2]# klist
+Ticket cache: FILE:/tmp/krb5cc_0
+Default principal: hdfs/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+
+Valid starting       Expires              Service principal
+11/13/2019 14:34:09  11/14/2019 14:34:09  krbtgt/SCDH.COM@SCDH.COM
+[root@cdh 477-hive-HIVESERVER2]# kdestroy
+[root@cdh 477-hive-HIVESERVER2]# klist
+klist: No credentials cache found (filename: /tmp/krb5cc_0)
+[root@cdh 477-hive-HIVESERVER2]# hive
+
+Logging initialized using configuration in jar:file:/opt/cloudera/parcels/CDH-5.16.2-1.cdh5.16.2.p0.8/jars/hive-common-1.1.0-cdh5.16.2.jar!/hive-log4j.properties
+Exception in thread "main" java.lang.RuntimeException: java.io.IOException: Failed on local exception: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]; Host Details : local host is: "cdh.us-central1-a.c.siba-237806.internal/10.128.0.62"; destination host is: "cdh.us-central1-a.c.siba-237806.internal":8020;
+        at org.apache.hadoop.hive.ql.session.SessionState.start(SessionState.java:586)
+        at org.apache.hadoop.hive.ql.session.SessionState.start(SessionState.java:534)
+        at org.apache.hadoop.hive.cli.CliDriver.run(CliDriver.java:695)
+        at org.apache.hadoop.hive.cli.CliDriver.main(CliDriver.java:634)
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.lang.reflect.Method.invoke(Method.java:606)
+        at org.apache.hadoop.util.RunJar.run(RunJar.java:226)
+        at org.apache.hadoop.util.RunJar.main(RunJar.java:141)
+Caused by: java.io.IOException: Failed on local exception: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]; Host Details : local host is: "cdh.us-central1-a.c.siba-237806.internal/10.128.0.62"; destination host is: "cdh.us-central1-a.c.siba-237806.internal":8020;
+        at org.apache.hadoop.net.NetUtils.wrapException(NetUtils.java:772)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1508)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1441)
+        at org.apache.hadoop.ipc.ProtobufRpcEngine$Invoker.invoke(ProtobufRpcEngine.java:231)
+        at com.sun.proxy.$Proxy17.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.protocolPB.ClientNamenodeProtocolTranslatorPB.getFileInfo(ClientNamenodeProtocolTranslatorPB.java:788)
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.lang.reflect.Method.invoke(Method.java:606)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invokeMethod(RetryInvocationHandler.java:258)
+        at org.apache.hadoop.io.retry.RetryInvocationHandler.invoke(RetryInvocationHandler.java:104)
+        at com.sun.proxy.$Proxy18.getFileInfo(Unknown Source)
+        at org.apache.hadoop.hdfs.DFSClient.getFileInfo(DFSClient.java:2168)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1266)
+        at org.apache.hadoop.hdfs.DistributedFileSystem$20.doCall(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.FileSystemLinkResolver.resolve(FileSystemLinkResolver.java:81)
+        at org.apache.hadoop.hdfs.DistributedFileSystem.getFileStatus(DistributedFileSystem.java:1262)
+        at org.apache.hadoop.fs.FileSystem.exists(FileSystem.java:1418)
+        at org.apache.hadoop.hive.ql.session.SessionState.createRootHDFSDir(SessionState.java:679)
+        at org.apache.hadoop.hive.ql.session.SessionState.createSessionDirs(SessionState.java:620)
+        at org.apache.hadoop.hive.ql.session.SessionState.start(SessionState.java:562)
+        ... 9 more
+Caused by: java.io.IOException: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at org.apache.hadoop.ipc.Client$Connection$1.run(Client.java:718)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.handleSaslConnectionFailure(Client.java:681)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:769)
+        at org.apache.hadoop.ipc.Client$Connection.access$3000(Client.java:396)
+        at org.apache.hadoop.ipc.Client.getConnection(Client.java:1557)
+        at org.apache.hadoop.ipc.Client.call(Client.java:1480)
+        ... 29 more
+Caused by: javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)]
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:212)
+        at org.apache.hadoop.security.SaslRpcClient.saslConnect(SaslRpcClient.java:413)
+        at org.apache.hadoop.ipc.Client$Connection.setupSaslConnection(Client.java:594)
+        at org.apache.hadoop.ipc.Client$Connection.access$2000(Client.java:396)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:761)
+        at org.apache.hadoop.ipc.Client$Connection$2.run(Client.java:757)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:415)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1924)
+        at org.apache.hadoop.ipc.Client$Connection.setupIOstreams(Client.java:756)
+        ... 32 more
+Caused by: GSSException: No valid credentials provided (Mechanism level: Failed to find any Kerberos tgt)
+        at sun.security.jgss.krb5.Krb5InitCredential.getInstance(Krb5InitCredential.java:147)
+        at sun.security.jgss.krb5.Krb5MechFactory.getCredentialElement(Krb5MechFactory.java:121)
+        at sun.security.jgss.krb5.Krb5MechFactory.getMechanismContext(Krb5MechFactory.java:187)
+        at sun.security.jgss.GSSManagerImpl.getMechanismContext(GSSManagerImpl.java:223)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:212)
+        at sun.security.jgss.GSSContextImpl.initSecContext(GSSContextImpl.java:179)
+        at com.sun.security.sasl.gsskerb.GssKrb5Client.evaluateChallenge(GssKrb5Client.java:193)
+        ... 41 more
+[root@cdh 477-hive-HIVESERVER2]# ll
+total 140
+-rw-r----- 1 hive hive   344 Nov 13 14:23 cloudera-monitor.properties
+-rw-r----- 1 hive hive   352 Nov 13 14:23 cloudera-stack-monitor.properties
+-rw------- 1 root root 18185 Nov 13 14:23 config.zip
+-rw-r----- 1 hive hive  3852 Nov 13 14:23 core-site.xml
+-rw-r----- 1 hive hive   635 Nov 13 14:23 fair-scheduler.xml
+-rw------- 1 hive hive  1602 Nov 13 14:23 hive.keytab
+-rw-r----- 1 hive hive   884 Nov 13 14:23 hive-log4j.properties
+-rw-r----- 1 hive hive  9938 Nov 13 14:23 hive-site.xml
+drwxr-x--x 2 hive hive    80 Nov 13 14:23 logs
+-rw-r----- 1 hive hive     0 Nov 13 14:23 navigator.client.properties
+-rw-r----- 1 hive hive     0 Nov 13 14:23 navigator.lineage.client.properties
+-rw------- 1 root root  3450 Nov 13 14:23 proc.json
+-rw-r----- 1 hive hive     0 Nov 13 14:23 redaction-rules.json
+-rw-r----- 1 hive hive   747 Nov 13 14:23 sentry-site.xml
+-rw-r----- 1 hive hive 73186 Nov 13 14:23 service-metrics.properties
+-rw------- 1 root root  3609 Nov 13 14:23 supervisor.conf
+drwxr-x--x 2 hive hive   220 Nov 13 14:23 yarn-conf
+[root@cdh 477-hive-HIVESERVER2]# klist -kt hive.keytab
+Keytab name: FILE:hive.keytab
+KVNO Timestamp           Principal
+---- ------------------- ------------------------------------------------------
+   2 11/13/2019 14:21:34 HTTP/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:34 HTTP/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:34 HTTP/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:34 HTTP/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:34 HTTP/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:34 HTTP/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:34 HTTP/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:34 HTTP/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:34 hive/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:34 hive/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:34 hive/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:34 hive/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:34 hive/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:34 hive/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:34 hive/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+   2 11/13/2019 14:21:34 hive/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+[root@cdh 477-hive-HIVESERVER2]# kinit -kt hive.keytab hive/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+[root@cdh 477-hive-HIVESERVER2]# hive
+
+Logging initialized using configuration in jar:file:/opt/cloudera/parcels/CDH-5.16.2-1.cdh5.16.2.p0.8/jars/hive-common-1.1.0-cdh5.16.2.jar!/hive-log4j.properties
+WARNING: Hive CLI is deprecated and migration to Beeline is recommended.
+hive> [root@cdh 477-hive-HIVESERVER2]# history
+    1  groupadd -g 5000 mapr
+    2  useradd -g 5000 -u 5000 mapr
+    3  useradd -m -u 5000 -g 5000 -G $(stat -c '%G' /etc/shadow) mapr
+    4  echo "mapr:mapr" | chpasswd
+    5  gpasswd -a mapr mapr
+    6  echo 'mapr ALL =(ALL) NOPASSWD: ALL' >>  /etc/sudoers
+    7  echo never > /sys/kernel/mm/transparent_hugepage/defrag
+    8  echo never > /sys/kernel/mm/transparent_hugepage/enabled
+    9  echo -e "\nDisabling SELinux"
+   10  sudo sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+   11  sudo echo net.ipv4.tcp_retries2=5  >>  /etc/sysctl.conf
+   12  sysctl -p
+   13  sudo sysctl vm.swappiness=1
+   14  systemctl disable firewalld
+   15  cat >> /etc/security/limits.d/90-nproc.conf <<EOL
+   16  mapr - nproc 64000
+   17  EOL
+   18  ssh-keygen
+   19  ssh mapr@sl01
+   20  su mapr
+   21  passwd mapr
+   22  su mapr
+   23  yum install -y wget
+   24  wget https://archive.cloudera.com/cm5/installer/latest/cloudera-manager-installer.bin
+   25  chmod +x cloudera-manager-installer.bin
+   26  ./cloudera-manager-installer.bin
+   27  hostname -f
+   28  su mapr
+   29  touch siba
+   30  touch siba1
+   31  file -b * | grep " siba" | wc -l
+   32  ll
+   33  file -b * | grep "siba" | wc -l
+   34  find . -type f -exec file -b {} \;
+   35  file * | grep script | wc -l
+   36  hdfs dfs -ls /
+   37  su hdfs
+   38  find / -name "*resourcemanager*.jar"
+   39  cd /usr/java/jdk1.7.0_67-cloudera/bin/jar -tvf /opt/cloudera/parcels/CDH-5.16.2-1.cdh5.16.2.p0.8/lib/hadoop-yarn/hadoop-yarn-server-resourcemanager.jar
+   40  /usr/java/jdk1.7.0_67-cloudera/bin/jar -tvf /opt/cloudera/parcels/CDH-5.16.2-1.cdh5.16.2.p0.8/lib/hadoop-yarn/hadoop-yarn-server-resourcemanager.jar
+   41  /usr/java/jdk1.7.0_67-cloudera/bin/jar -tvf  /opt/cloudera/parcels/CDH-5.16.2-1.cdh5.16.2.p0.8/lib/hadoop-yarn/hadoop-yarn-server-resourcemanager.jar | grep fifoscheduler
+   42  /usr/java/jdk1.7.0_67-cloudera/bin/jar -tvf  /opt/cloudera/parcels/CDH-5.16.2-1.cdh5.16.2.p0.8/lib/hadoop-yarn/hadoop-yarn-server-resourcemanager.jar | grep fairscheduler
+   43  /usr/java/jdk1.7.0_67-cloudera/bin/jar -tvf  /opt/cloudera/parcels/CDH-5.16.2-1.cdh5.16.2.p0.8/lib/hadoop-yarn/hadoop-yarn-server-resourcemanager.jar | grep capacityscheduler
+   44  /usr/java/jdk1.7.0_67-cloudera/bin/jar -tvf  /opt/cloudera/parcels/CDH-5.16.2-1.cdh5.16.2.p0.8/lib/hadoop-yarn/hadoop-yarn-server-resourcemanager.jar | grep -i fair
+   45  /usr/java/jdk1.7.0_67-cloudera/bin/jar -tvf  /opt/cloudera/parcels/CDH-5.16.2-1.cdh5.16.2.p0.8/lib/hadoop-yarn/hadoop-yarn-server-resourcemanager.jar | grep -i fifo
+   46  /usr/java/jdk1.7.0_67-cloudera/bin/jar -tvf  /opt/cloudera/parcels/CDH-5.16.2-1.cdh5.16.2.p0.8/lib/hadoop-yarn/hadoop-yarn-server-resourcemanager.jar | grep -i capacity
+   47  find / -name "*hadoop*example.jar"
+   48  passwd
+   49  echo "$vech"
+   50  echo "Backup dir $backup"
+   51  export -p
+   52  vech=Bus
+   53  echo "$vech"
+   54  export backup="/nas10/mysql"
+   55  echo "Backup dir $backup"
+   56  vi sshcon.sh
+   57  vi /root/source
+   58  vi /root/dest
+   59  cd /root/
+   60  cp source dest
+   61  ll
+   62  vi sshcon.sh
+   63  chmod +x sshcon.sh
+   64  ./sshcon.sh > test_9_9_2019
+   65  cat test_9_9_2019
+   66  vi sshcon.sh
+   67  ./sshcon.sh > test_9_9_2019
+   68  cat test_9_9_2019
+   69  export backup="/nas10/mysql"
+   70  echo "Backup dir $backup"
+   71  export -p
+   72  echo "Backup dir $backup"
+   73  ssh sl01 df
+   74  ssh s101
+   75  ssh sl01
+   76  bash
+   77  vi sshcon.sh
+   78  yum -y install krb5-libs krb5-workstation
+   79  systemctl start named
+   80  systemctl enable named
+   81  ipa-server-install
+   82  su hdfs
+   83  cd /var/run/cloudera-scm-agent/process/
+   84  ll
+   85  cd 126-hdfs-NAMENODE
+   86  ll
+   87  vi hdfs-site.xml
+   88  jps
+   89  su hdfs
+   90  yum install -y nc telnet
+   91  telnet 104.197.60.34 7222
+   92  hadoop distcp hdfs://cdh.us-central1-a.c.siba-237806.internal:50070/tmp/prokash.txt maprfs://104.197.60.34:7222/tmp/
+   93  hadoop distcp hdfs://cdh.us-central1-a.c.siba-237806.internal:50070/tmp/prokash.txt maprfs:///104.197.60.34:7222/tmp/
+   94  hadoop distcp hdfs://cdh.us-central1-a.c.siba-237806.internal:8020/tmp/prokash.txt maprfs:///104.197.60.34:7222/tmp/
+   95  hadoop distcp webhdfs://cdh.us-central1-a.c.siba-237806.internal:50070/tmp/prokash.txt maprfs:///104.197.60.34:7222/tmp/
+   96  hadoop distcp hdfs://cdh.us-central1-a.c.siba-237806.internal:8020/tmp/prokash.txt maprfs:///104.197.60.34:7222/tmp/
+   97  hadoop distcp maprfs:///104.197.60.34:7222/tmp/ webhdfs://cdh.us-central1-a.c.siba-237806.internal:50070/tmp/prokash.txt
+   98  su hdfs
+   99  cd /var/run/cloudera-scm-agent/process/
+  100  ll
+  101  cd 401-hdfs-NAMENODE
+  102  ll
+  103  find / -name master
+  104  cd /
+  105  ll
+  106  cd /opt/
+  107  ll
+  108  cd cloudera/
+  109  ll
+  110  cd parcels/
+  111  ll
+  112  cd /etc/
+  113  ll
+  114  cd hadoop
+  115  ll
+  116  find / -name *master*
+  117  cat /usr/lib/cmf/agent/src/cmf/agent.py
+  118  cat /etc/hadoop/conf/log4j.properties
+  119  cd /var/run/cloudera-scm-agent/process/
+  120  ls -ltr
+  121  cd 401-hdfs-NAMENODE
+  122  ll
+  123  cat log4j.properties
+  124  pwd
+  125  find / -name *log4*
+  126  cat /etc/hadoop/conf.cloudera.hdfs/log4j.properties
+  127  cd /etc/hadoop/conf
+  128  ll
+  129  ls -a
+  130  vi log4j.properties
+  131  rpm -qa | grep kbr
+  132  rpm -qa | grep krb
+  133  yum erase -y krb5*
+  134  yum -y install krb5-server krb5-libs krb5-workstation
+  135  cd /etc/krb5.conf
+  136  vi /etc/krb5.conf
+  137  hostname -f
+  138  vi /etc/krb5.conf
+  139  cd  /var/kerberos/krb5kdc/
+  140  ll
+  141  vi kadm5.acl
+  142  vi kdc.conf
+  143  kdb5_util create -r SCDH.COM -s
+  144  LL
+  145  ll
+  146  cat /etc/krb5.conf
+  147  spark-submit
+  148  ./spark-sumit
+  149  cd /var/run/cloudera-scm-agent/
+  150  ll
+  151  cd process/
+  152  ll
+  153  pwd
+  154  cd
+  155  cat /etc/krb5.conf
+  156  service krb5kdc restart
+  157  service kadmin restart
+  158  service krb5kdc status
+  159  service kadmin status
+  160  service krb5kdc stop
+  161  service kadmin stop
+  162  chkconfig krb5kdc on
+  163  chkconfig kadmin on
+  164  ll
+  165  cd /etc/
+  166  ll
+  167  scp -p krb5.conf root@sl01:/etc/
+  168  scp -p krb5.conf root@sl02:/etc/
+  169  scp -p krb5.conf root@sl03:/etc/
+  170  cd  /var/kerberos/krb5kdc/
+  171  ll
+  172  scp -p kadm5.acl kdc.conf  root@sl02:/var/kerberos/krb5kdc/
+  173  ll
+  174  scp -p kadm5.acl   root@sl02:/var/kerberos/krb5kdc/
+  175  scp -p kadm5.acl   root@sl01:/var/kerberos/krb5kdc/
+  176  ll
+  177  scp -p kadm5.acl   root@sl03:/var/kerberos/krb5kdc/
+  178  chkconfig krb5kdc on
+  179  chkconfig kadmin on
+  180  service kadmin restart
+  181  service krb5kdc restart
+  182  cd
+  183  kadmin -p "admin/admin@SCDH.COM"
+  184  kadmin.local -q "addprinc admin/admin"
+  185  kadmin -p "admin/admin@SCDH.COM"
+  186  clear
+  187  klist
+  188  service kadmin status
+  189  service krb5kdc status
+  190  clear
+  191  klist
+  192  kadmin.local
+  193  list
+  194  klist
+  195  kinit admin/admin
+  196  kinit root/admin
+  197  kadmin -p "admin/admin@SCDH.COM"
+  198  kadmin.local -q "addprinc admin/admin"
+  199   kadmin -p "admin/admin@SCDH.COM"
+  200  kpasswd admin/admin
+  201  kadmin.local -q "addprinc siba/admin"
+  202  kadmin -p "siba/admin@SCDH.COM"
+  203   kinit siba/admin
+  204  klist
+  205  hostname -f
+  206  cat /etc/krb5.conf
+  207  cd /var/kerberos/krb5kdc/
+  208  ll
+  209  cat kdc.conf
+  210  clear
+  211  ll
+  212  su siba
+  213  hdfs dfs -ls /
+  214  ll
+  215  cd /var/run/cloudera-scm-agent/
+  216  ll
+  217  cd process/
+  218  ll
+  219  ls -lrth
+  220  cd 466-hdfs-NAMENODE
+  221  ll
+  222  klist -kt hdfs.keytab
+  223  kinit -kt hdfs/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+  224  kinit -kt hdfs.keytab hdfs/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+  225  hdfs dfs -ls /
+  226  cp hdfs.keytab /
+  227  cd /var/run/cloudera-scm-agent/
+  228  ll
+  229  cd process/
+  230  ll
+  231  ls -lrth
+  232  cd 477-hive-HIVESERVER2
+  233  ll
+  234  hive
+  235  klist
+  236  kdestroy
+  237  klist
+  238  hive
+  239  ll
+  240  klist -kt hive.keytab
+  241  kinit -kt hive.keytab hive/cdh.us-central1-a.c.siba-237806.internal@SCDH.COM
+  242  hive
+  243  history
+
+======================
+cd /var/run/cloudera-scm-agent/process/
+klist
+klist -kt hdfs.keytab
+kinit -kt hdfs.keytab hdfs/cdh.us-central1-a.c.siba-237806.internal@CDHERR.COM
+hdfs dfs -ls /
+klist
+
+
+
+
+

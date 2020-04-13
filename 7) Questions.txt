@@ -1,0 +1,228 @@
+126) How to see underreplicated blocks in Hadoop?
+Answer:	 Hadoop dfsadmin –reports
+
+127) Does HDFS make block boundaries between records?
+Yes
+
+128) Command ktutil used for?
+Answer:
+The ktutil command invokes a command interface from which an administrator can read, write, or edit entries in a keytab.
+
+129) Why is iptables disable?
+A. Because hadoop is communicate in some ports which is above external.that's why disable iptables.
+
+130) What two daemons / services make up the YARN framework?
+Resource Manager / Node Manager
+
+131) What construct is granted CPU and memory resources?
+Container
+
+132) What daemon / service are responsible for application fault tolerance?
+Application Master
+
+133) What daemon / service controls access to global cluster resources?
+Resource Manager
+
+134) What daemon / service make resource requests after an application has launched?
+Application Master
+
+135) What daemon / service manage file localization for applications?
+Node Manager
+
+136) The YARN component that enables multitenancy and adherence to Service Level Agreements is called 
+The Resource Manager
+
+137) List the YARN management options
+Ambari Web UI, Resource Manager UI, Command line and manual configuration, and YARN API
+
+138) Where can you quickly view the amount of utilized memory for the Node Managers in your cluster on a per-machine basis?
+Service > YARN > Heat Maps
+
+139) Which framework provides provisioning, management, and monitoring capabilities?
+Ambari UI
+
+140) Which Web interface provides detailed information on running applications?
+Resourmanager Web UI
+
+141) What CLI command will display a list of every node in the cluster regardless of its status?
+Yarn nodes –list –all
+
+142) What does file could only be replicated to 0 nodes, instead of 1 mean?
+Ans. 
+- The namenode does not have any available DataNodes.
+
+143) What happens when a user submits a Hadoop job when the Name Node is down- does the job get in to hold or does it fail.
+The Hadoop job fails when the Name Node is down.
+
+144) What happens when a user submits a Hadoop job when the Job Tracker is down- does the job get in to hold or does it fail.
+The Hadoop job fails when the Job Tracker is down.
+
+145) The requirement is to add a new data node to a running Hadoop cluster; how do I start services on just one data node?
+Ans. - You do not need to shutdown and/or restart the entire cluster in this case
+
+146) Mention what is the best way to copy files between HDFS clusters?
+The best way to copy files between HDFS clusters is by using multiple nodes and the distcp command, so the workload is shared.
+
+147) Why yarn came into picture?
+Scalability, Availability Issue, Problem with Resource Utilization, Limitation in running non-Map Reduce Application. These all issues in hadoop one that's why yarn came into picture
+
+148) Suppose you disable selinux on hadoop? can i keep rdmbs hadoop now?
+A. Hadoop is not compaliance with data compaliance. 
+In that case we will disable selinux install hadoop then enable seliunx and put your data.
+
+149) Assume you do not believe the information from the previous command is accurate. Which CLI command will update the node information at the Resource Manager?
+Yarn rmadmin –refresh nodes
+
+150) What are the ports used to access Resource Manager and Node Manager REST APIs?
+Resource Manager 	8088 / Node Manager 8042
+
+===================================================================================================================================================
+
+41) What is SSL is used for ?
+- It is a standard security technology for establishing an encrypted link between a server and a client—typically a web server (website) and a browser.
+- After the secure connection is made, the session key is used to encrypt all transmitted data.
+
+42) How is the distance between two nodes defined in Hadoop?
+Measuring bandwidth is difficult in Hadoop so network is denoted as a tree in Hadoop. 
+The distance between two nodes in the tree plays a vital role in forming a Hadoop cluster  and is defined by the network topology and java interface DNStoSwitchMapping. 
+The distance is equal to the sum of the distance to the closest common ancestor of both the nodes. 
+The method getDistance(Node node1, Node node2) is used to calculate the distance between two nodes with the assumption that the distance from a node to its parent node is always 1.
+
+43) Explain about the functioning of Master Slave architecture in Hadoop?
+Hadoop applies Master Slave architecture at both storage level and computation level.
+Master: Name Node
+File system namespace management and access control from client.
+Executes and manages operation of file system namespace like closing, opening, renaming of directories and files.
+Slave: Data Node
+A cluster has only one Data Node - per node. File system namespace are exposed to the clients, which allow them to store the files. These files are split into two or more blocks, which are stored in the Data Node. Data Node is responsible for replication, creation and deletion of block, as and when instructed b
+
+44) How are HDFS blocks replicated?
+The default replication factor is 3 which means that the data is safe if 3 copies are created. 
+HDFS follows a simple procedure to replicate blocks.One replica is present on the machine on which the client is running, the second replica is created on a randomly chosen rack (ensuring that it is different from the first allocated rack) 
+and a third replica is created on a randomly selected machine on the same remote rack on which second replica is created.
+
+45) What is InputFormat in Hadoop?
+As the name suggests, it specifies the process of reading data from files into an instance of the Mapper. 
+There are various implementations of InputFormat, like for reading text files, binary data and etc.We can even create our own custom InputFormat implementation.  
+Another important job of InputFormat is to split the data and provide inputs to map tasks.
+
+46) How will you check which stack is there if dont have webUI of CM?
+Answer: 
+If you see hadoop process is not running on 
+i) ps -ef|grep hadoop
+ii) start-dfs.sh. 
+iii) Monitor with 
+hdfs dfsadmin -report
+
+iv) To check whether Hadoop Nodes are running or not:
+sudo -u hdfs hdfs dfsadmin -report
+
+47) How will you check ram, cpu, storage?
+Answer:
+i) CPU
+$ cat /proc/cpuinfo
+
+ii) Memory :
+$ free
+$ cat /proc/meminfo
+
+iii) HDD:
+$ df -h
+$ sudo fdisk -l
+$ hdparm -i /dev/device
+
+48) linux How will you check filesystem?
+Answer:
+i) Check File System Disk Space Usage
+[root@tecmint ~]# df
+
+ii) Display Information of all File System Disk Space Usage
+[root@tecmint ~]# df -a
+
+iii) Show Disk Space Usage in Human Readable Format
+[root@tecmint ~]# df -h
+
+49) Are job tracker and task trackers present in separate machines?
+Answer:
+They are separate machines because
+JobTracker is a master which creates and runs the job. 
+JobTracker which can run on the NameNode allocates the job to TaskTrackers which run on DataNodes; 
+TaskTrackers run the tasks and report the status of task to JobTracker.
+
+50) How NameNode Handles data node failures?
+Answer:
+DataNode will constantly send a heartbeat to Name node in this way Name node understands that Data node is working ,
+If in case (due to any reason) Data node stops sending the heartbeat to the Name node ,
+Then name node will come to know that that particular Data node is down and then make sure that the Blocks in that Data node get replicated in another node and 
+If in case the node which stopped sending the heartbeat again started to send its heartbeat then Name node will balance the replication factor again 
+
+51) If RM goes down, will jobs continue or all jobs will get fail?
+Answer:
+When the Active goes down or becomes unresponsive, another RM is automatically elected to be the Active which then takes over. 
+Note that, there is no need to run a separate ZKFC daemon as is the case for HDFS because ActiveStandbyElector embedded in RMs acts as a failure detector and a leader elector instead of a separate ZKFC deamon.
+ResourceManager represented a single point of failure—if NodeManagers lost contact with the ResourceManager, all jobs in progress would be halted, and no new jobs could be assigned.
+The new feature incorporates ZooKeeper to allow for automatic failover to a standby ResourceManager in the event of the primary’s failure
+
+52) Can you schedule BDR for later time? how?
+Answer:
+Yes, using cloudera manager server we can schedule bdr later time with replication of hdfs within the cluster or into the another cluster
+Steps
+- Configuring Replication of HDFS Data
+- Viewing Replication Schedules
+- Viewing Replication History
+
+53) Explain about Capacity scheduler?
+
+Answer:
+It assigns resource based on the capacity required by the organisation. 
+This is set up by queues for each organisation with specified amount of capacity. 
+The queue is based on FIFO scheduling.
+
+54) have you performed yarn tunning
+ ? OR
+What are the parameters that needs to be tweaked to fine-grain the performance?
+
+Answer:
+1) Memory Tuning
+2) Improving IO Performance
+3) Minimizing the Disk Spill by Compressing Map Output
+4) Tuning the Number of Mapper or Reducer Tasks
+&
+yarn.app.mapreduce.am.resource.cpu-vcores
+yarn.app.mapreduce.am.resource.mb
+mapreduce.map.cpu.vcores
+mapreduce.map.memory.mb
+mapreduce.reduce.cpu.vcores
+mapreduce.reduce.memory.mb
+mapreduce.reduce.java.opts
+mapreduce.task.io.sort.mb (disk spill)
+
+55) Do you know log file concept?
+Ans. A log file is a recording of everything that goes in and out of a particular server. 
+The point of a log file is to keep track of what is happening with the server. 
+If something should malfunction within a complex system, there may be no other way of identifying the problem. 
+Log files are also used to keep track of complex systems, so that when a problem does occur, it is easy to pinpoint and fix. 
+Log files are also important to keeping track of applications that have little to no human interaction, such as server applications
+
+56) What is checkpointing ?
+Ans. Checkpointing is an essential part of maintaining  filesystem metadata in HDFS. 
+It’s crucial for efficient NameNode recovery and restart, and is an important indicator of overall cluster health. 
+Checkpointing is a process that takes an fsimage and edit log and compacts them into a new fsimage
+
+57) Secondary NN is installed on the same master node or on another machine ?
+Ans. It is always better to deploy a secondary NameNode on a separate machine. 
+When the secondary NameNode is deployed on a separate machine it does not interfere with the operations of the primary node.
+
+58) Explain Fsimage & edit logs
+Ans.  fsimage – An fsimage file contains the complete state of the file system at a point in time. 
+Every file system modification is assigned a unique transaction ID. An fsimage file represents the file system state after all modifications up to a specific transaction ID.
+edits – An edits file is a log that lists each file system change (file creation, deletion or modification) that was made after the most recent fsimage.
+
+59) Do you have anything called over replicated in Hadoop?
+Answer:	Yes for example if your one node goes down HDFS will replicate the blocks residing on that node on another node. 
+When that node which was down starts again all the blocks on that becomes available again. 
+In this scenario the blocks will get over replicated as they were replicated assuming the node was down.
+
+60) Differentiate between Structured and Unstructured data.
+In Structured Data,  Data which can be stored in traditional database systems in the form of rows and columns, 
+In Unstructured data, Unorganized and raw data that cannot be categorized as semi structured or structured data is referred to as unstructured data

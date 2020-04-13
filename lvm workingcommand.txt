@@ -1,0 +1,49 @@
+lsscsi -s
+ lsblk
+ pvcreate /dev/sdb
+ vgcreate datavgapp03 /dev/sdb
+ lvcreate -l 100%FREE -n "app03" datavgapp03 /dev/sdb
+ mkfs.ext4 /dev/mapper/datavgapp03-app03
+ mkdir /app03
+ vi /etc/fstab
+ mount -a
+ df -lh /app03
+
+
+-----
+ vgs
+ pvcreate /dev/sdd
+ vgcreate datavg1 /dev/sdd
+ lvcreate -l 100%FREE -n "web2" datavg1 /dev/sdd
+ mkfs.ext4 /dev/mapper/datavg1-web2
+ mkdir /web2
+ vi /etc/fstab
+ umount /web01/
+ lvrename /dev/datavg/web01 /dev/datavg/web1
+ mv /web01 /web1
+ vi /etc/fstab
+ mount -a
+ mkdir /web1
+ mount -a
+ df -lh /web1
+
+Swap
+------
+swapoff -a
+lvresize -L 16G /dev/vg00/swapvol
+mkswap /dev/mapper/vg00-swapvol
+swapon -a
+swapon -v
+/dev/mapper/vg00-swapvo1 swap swap default 0 0
+
+lvextend /dev/vg00/rootvol -L 10G
+lvextend /dev/vg00/tmpvol -L 10G
+lvextend /dev/vg00/homevol -L 10G
+xfs_growfs /dev/mapper/vg00-tmpvol
+xfs_growfs /dev/mapper/vg00-homevol
+
+rescan-scsi-bus.sh -r
+rescan-scsi-bus.sh -a
+systemctl restart multipathd
+multipath -ll
+/dev/mapper/mpathd

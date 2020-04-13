@@ -1,0 +1,216 @@
+101) - Is there a hdfs command to see available free space in hdfs
+Ans. 
+- hadoop dfsadmin -report
+
+102) What will happen if target-dir already exists during sqoop import?
+Answer:
+- Sqoop runs a map-only job and if target directory already exists, it will throw an execption.
+
+103) What is the default number of mapper in a sqoop job?
+Answer: 5
+
+104) The DistCp –update option ensures that only files that meet two criteria are copied. What are those criteria?
+Answer:
+The file does not exist at the destination, or the file at the destination has different contents.
+
+105) Which DistCp mode might typically be faster, static or dynamic?
+Answer: Dynamic. 
+
+106) List the two types of ACL masks.
+Answer: Access masks and default masks
+
+107) What is the advantage of turning on maintenance mode when decommissioning or deleting worker nodes?
+Answer:
+Turning on Maintenance mode will suppress alerts, warnings and status change indicator generated for the object
+
+108) When Name Node is down, what does the Job Tracker do? 
+When Name node is down the entire cluster is inaccessible, hence the job tracker will also be down.
+
+109) Which type of Hadoop cluster nodes provide resources for data processing?
+Slaves Nodes
+
+110) Mention Hadoop core components?
+•	HDFS
+•	MapReduce
+
+111) Which tool will you prefer to use for monitoring Hadoop and HBase clusters?
+Ans. Ambari Metrics
+
+112) In my company we don't have ipv4 we have ipv6 only hadoop can not work here?
+A. ipv6 only support in hadoop 3 version. ipv6 is not support in hadoop 2.
+
+113) Have you worked on vanila, hbase, kafka, ansible hadoop?
+
+Answer: 
+No i havent got the opportunity to do it but i am ready to learn if i get an opportunity.
+
+114) What happen to existing data if we change block size in HDFS?
+Answer:
+If you change the block size in hdfs-site.xml configuration file, it won't affect the existing data which is already stored in HDFS
+
+115) cm ports?
+ANSWER:
+Cloudera Manager Server 	7180/7183
+Cloudera Manager Agent            9000
+Cloudera Manager Event Server 7184
+
+116) Which service manages cluster storage resources?
+HDFS
+
+117) Which HDFS Shell command displays the number of bytes in a file or directory?
+The du command
+
+118) How does a Name Node determine Data Node availability?
+The Name Node listens for heartbeats from the Data Nodes. Heartbeats arrive every three seconds by default.
+
+119) On a Name Node, what type of information is contained within an fsimage file?
+The fsimage file contains a static image of the state of the HDFS file system at a specific point in time
+
+120) If HDFS data is already redundant across multiple Data Nodes, why do you need to back it up?
+Because disasters happen that can affect more than one system or an entire data center.
+
+121) How are HDFS snapshots useful for disaster recovery?
+Because snapshots can be replicated to another cluster that could take over responsibility for a failed cluster.
+
+122) What does the HDFS balancer do?
+The HDFS balancer moves data blocks from over-utilized Data Nodes to under-utilized Data Nodes.
+
+123) Which command is used to verify if the HDFS is corrupt or not? (repeat)
+ Hadoop FSCK (File System Check) command is used to check missing blocks
+
+124) Is datanode logical or physical?
+Answer:	A datanode is a physical device which reads and writes the data.
+
+125) Where was your data?
+Answer:	Most of our data was obtained from sensors. We used to keep the data in HDFS.
+
+====================================================================================================================================================
+
+21) What are security measure you have to taken for your cluster.?
+Ans:
+1. Plan before you deploy
+2. Don’t overlook basic security measures 
+3. Choose the right remediation technique 
+4. Ensure that encryption integrates with access control 
+5. Monitor, detect and resolve issues.
+We have many choices to secure our cluster as per cloudera and hortonworks.
+In case of cloudera we use AD kerberos &
+In case of Hortonworks we use Ranger
+
+22) How to control number of reducers in a mapreduce program?
+Answer:
+- By default, for every 1GB of input data 1 reducer is created. But it can be overridden
+- You can set number of   reducer on job object there is function call as job.setNumReduceTask (int n) 
+- It is specify how many reducer you want that particular mapreducer application.
+
+23) What is rack-aware replica placement policy?
+Answer:
+1. Rack-awareness is used to take a node’s physical location into account while scheduling tasks and allocating storage.
+2. Default replication factor is 3 for a data blocks on HDFS.
+3. The first two copies are stored on DataNodes located on the same rack while the third copy is stored on a different rack
+
+24) What are the problems with Hadoop 1.0?
+Answer:
+1. NameNode: No Horizontal Scalability and No High Availability
+2. Job Tracker: Overburdened.
+3. MRv1: It can only understand Map and Reduce tasks
+
+25)  Is it possible to load 3TB of data in hive ?
+Answer:
+ Yes,  you can load 3tb of data from your local file system but it will take too much time that all are depends on your local systems configurations like Ram,processor.
+ hive meta store only save the metadata of 3tb table and the actual data will stored in hdfs only.
+
+26) Why do the nodes are removed and added frequently in a Hadoop cluster?
+Answer:
+1. The Hadoop framework utilizes commodity hardware, and it is one of the important features of Hadoop framework. 
+    It results in a frequent DataNode crash in a Hadoop cluster.
+2. The ease of scale is yet another important feature of the Hadoop framework that is performed according to the rapid growth of data volume.
+
+27) Explain the NameNode recovery process.
+Answer:
+Step 1: To start a new NameNode, utilize the file system metadata replica (FsImage).
+Step 2: Configure the clients and DataNodes to acknowledge the new NameNode.
+Step 3: Once the new Name completes the loading of last checkpoint FsImage and receives block reports from the DataNodes, the new NameNode start serving the client.
+
+28) Define “Checkpointing”. What is its benefit?
+Answer:
+Checkpointing is a procedure to that compacts a FsImage and Edit log into a new FsImage.
+In this way, the NameNode handles the loading of the final inmemory state from the FsImage directly, instead of replaying an edit log. 
+The secondary NameNode is responsible to perform the checkpointing process.
+Benefit of Checkpointing:
+Checkpointing is a highly efficient process and decreases the startup time of the NameNode.
+
+29) What happens when two clients try to access the same file in HDFS?
+Answer:
+- When the n first client contacts the NameNode to open the file to write, the NameNode provides a lease to the client to create this file.
+- When the second client sends a request to open that same file to write, the NameNode find that the lease for that file has already been given to another client, and
+  thus reject the second client’s request.
+
+30) What is HDFS namenode federation?
+Answer:
+- In HDFS federation, there are multiple namenodes, each storing metadata and block mapping of files and directories contained in 
+   particular sub-directories.
+- The list of sub-directories managed by a namenode is called a namespace volume.
+- Blocks for files belonging to namespace is called block pool.
+
+31) Can You Elaborate About Mapreduce Job?
+Answer :
+Based on the configuration, the MapReduce Job first splits the input data into independent chunks called Blocks. 
+These blocks processed by Map() and Reduce() functions. 
+First Map function process the data, then processed by reduce function. 
+The Framework takes care of sorts the Map outputs, scheduling the tasks. 
+
+32) How Does Master Slave Architecture In The Hadoop?
+Answer :
+The MapReduce framework consists of a single master JobTracker and multiple slaves, each cluster-node will have one TaskTracker. 
+The master is responsible for scheduling the jobs' component tasks on the slaves, monitoring them and re-executing the failed tasks. 
+The slaves execute the tasks as directed by the master.
+
+33) Following 3 Daemons run on Master nodes.
+Answer:
+- NameNode : This daemon stores and maintains the metadata for HDFS.
+- Secondary NameNode : Performs housekeeping functions for the NameNode.
+- JobTracker : Manages MapReduce jobs, distributes individual tasks to machines running the Task Tracker. Following 2 Daemons run on each Slave nodes
+- DataNode : Stores actual HDFS data blocks.
+- TaskTracker : It is Responsible for instantiating and monitoring individual Map and Reduce tasks.
+
+34) - Why do we need Hadoop?
+Ans. 
+- Everyday a large amount of unstructured data is getting dumped into our machines. 
+- The major challenge is not to store large data sets in our systems but to retrieve and analyze the big data in the organizations, that too data present in different machines at different locations. 
+- In this situation a necessity for Hadoop arises. 
+
+35) What Is The Function Of ‘job Tracker’?
+Answer :
+Job tracker is one of the daemons that runs on name node and submits and tracks the MapReduce tasks in Hadoop. 
+There is only one job tracker who distributes the task to various task trackers. 
+When it goes down all running jobs comes to a halt
+
+36) Explain how indexing in HDFS is done?
+Hadoop has a unique way of indexing. Once the data is stored as per the block size, 
+the HDFS will keep on storing the last part of the data which say where the next part of the data will be.
+
+37) How many Data Nodes can be run on a single Hadoop cluster? 
+Thousands of data nodes can be run on a single hadoop cluster but there are many factors to consider: 
+name node memory, no. of blocks to be stored, block replication factor, how will the cluster be used etc
+
+38) Can we implement RAID on HDFS? Datanode as well as namenode.
+Ans:
+- RAID is used for two purposes. Depending on the RAID configuration you can get:
+Better performance and Fault-tolerance
+- Since HDFS is taking care of fault-tolerance and "striped" reading, there is no need to use RAID underneath an HDFS.
+- Since the namenode is a single-point-of-failure in HDFS, it requires a more reliable hardware setup. Therefore, the use of RAID is 
+   recommended on namenodes.
+
+39) What is DRF tell me about that.
+Ans:
+An extension of fair scheduling for more than one resource—it determines resource shares (CPU, memory) for a job separately based on the 
+availability of those resources and the needs of the job. 
+1.If a pool's allocation is not in use it can be given to other pools. 
+2.Otherwise, a pool receives a share of resources in accordance with the pool's weight. 
+
+40) Can You Tell Is What Will Happen To A Namenode, When Job Tracker Is Not Up And Running?
+Answer :
+When the job tracker is down, it will not be in functional mode, all running jobs will be halted because it is a single point of failure. 
+Your whole cluster will be down but still Namenode will be present. 
+As such the cluster will still be accessible if Namenode is working, even if the job tracker is not up and running. But you cannot run your Hadoop job

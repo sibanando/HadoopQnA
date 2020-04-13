@@ -1,0 +1,198 @@
+1) How can you decide the heap memory limit for a Name Node and Hadoop Service?
+Answer: Name Node heap size depends on many factors such as the number of files, the number of blocks, and the load on the system.
+
+2) Is your KDC server in AD, do you have control over AD?
+
+Answer: Yes, but we don't have control
+
+3) How many types of scheduler
+ and Which scheduler you are using?
+
+Answer: Fair Scheduler & Capacity scheduler. We are using Fair Scheduler
+
+4) What are you using for hive-shell
+?
+Answer: we are using beeline promt
+
+5) How many option do we have for RDBMS DB 
+which ones have you worked on?
+
+Answer: a) mySQL (default) b) Oracle c) Postgres
+
+6) Do you have mySQL database's HA?
+
+Answer: No, we are not perfer my SQL we are mostly use for Yarn, Hdfs HA.
+
+7) Can i manage the cluster without zookeeper services
+?
+Answer: Yes, but there will be lot of issue like synchronisation issue, cordinated data n many more
+
+8) Do you know about spark have you worked on it?
+
+Answer: Yes, I know about the spark but in our cluster we are not using spark. 
+
+9) List three reasons to add or remove cluster nodes.
+Answer: Hardware Failure, Software Upgrade, Hardware Obsolete
+
+10) Mention what is the data storage component used by Hadoop?
+Answer: HBase.
+
+11) Which command is used to verify if the HDFS is corrupt or not?
+Answer: Hadoop FSCK (File System Check) command is used to check missing blocks.
+
+12) When configuring Hadoop manually, which property file should be modified to configure slots?
+Answer: In Hadoop 1 its mapred-site.xml & in Hadoop 2 its yarn-site.xml
+
+13) What was the unstructed data that was received.
+Answer: log files, images, movies etc. 
+
+14) What is the name of the configuration file for configuring capacity scheduler?
+Answer: (Hadoop 1) mapred-site.xml & (Hadoop 2) yarn-site.xml
+
+15) Which  file u will refer to perform clusterwide operation?
+Answer: core-site.xml
+
+16) Which of the three Hadoop deployment modes is commonly used for production environments
+Answer: Distributed Mode
+
+17) Heap memory is responsible for which component ?
+Answer: Heap memory is responsible for all the components in Hadoop as all of them run on JVM.
+
+18) - What is the communication channel between client and namenode/datanode?
+Answer: The mode of communication is SSH.
+
+19) - Copy a directory from one node in the cluster to another
+Answer: Use '-distcp' command to copy,
+
+20) - Default replication factor to a file is 3.Use '-setrep' command to change replication factor of a file to 2.
+Answer: hadoop fs -setrep -w 2 apache_hadoop/sample.txt
+
+====================================================================================================================================================
+
+1) How does hadoop know how many mappers has to be started?
+Answer:
+- Number of mappers equals number of input splits.
+- Number of input splits ( for single file) = ceil (size of file) / (size of input split)
+- if have 1 GB data  means 1GB/ 128MB = 8 mappers.
+
+2) What are the similarities and differences between flume and sqoop?
+Answer:
+- Both are data ingestion tool.
+- Sqoop is specialised to bring data to and from RDBMS and HDFS, where as
+  Flume is designed to collect data from diverse sources to HDFS.
+- Sqoop job or import/export process runs only once unless scheduled by a scheduler
+  Whereas Flume is long running agent on its own.
+
+3) What is Fault Tolerance?
+Answer: 
+- Suppose you have a file stored in a system, and due to some technical problem that file gets destroyed. 
+- Then there is no chance of getting the data back present in that file. 
+- To avoid such situations, Hadoop has introduced the feature of fault tolerance in HDFS. 
+- In Hadoop, when we store a file, it automatically gets replicated at two other locations also. 
+
+4) Replication causes data redundancy, then why is it pursued in HDFS?
+Answer:
+- HDFS works with commodity hardware that has high chances of getting crashed any time. 
+- Thus, to make the entire system highly fault-tolerant, HDFS replicates and stores data in different places. 
+- Any data on HDFS gets stored at least 3 different locations. 
+- So, even if one of them is corrupted and the other is unavailable for some time for any reason, then data can be accessed from the third one. 
+
+5) Since the data is replicated thrice in HDFS, does it mean that any calculation done on one node will also be replicated on the other two?
+- No, calculations will be done only on the original data. 
+- The master node will know which node exactly has that particular data. 
+- In case, if one of the nodes is not responding, it is assumed to be failed. 
+- Only then, the required calculation will be done on the second replica.
+
+6) How client application interacts with the NameNode? OR How The Client Communicates With Hdfs? 
+Answer:
+1. Client applications interact using Hadoop HDFS API with the NameNode when it has to locate/add/copy/move/delete a file.
+2. The NameNode responds the successful requests by returning a list of relevant DataNode servers where the data is residing.
+3. Client can talk directly to a DataNode after the NameNode has given the location of the data
+
+7) What Is A Namenode? How Many Instances Of Namenode Run On A Hadoop Cluster?
+Answer :
+- The NameNode is the centerpiece of an HDFS file system. 
+- It is the master node on which job tracker runs and consists of the metadata. 
+- It maintains and manages the blocks which are present on the datanodes. 
+- It is a high-availability machine and single point of failure in HDFS.
+- There is only One NameNode process run on any hadoop cluster. NameNode runs on its own JVM process.
+
+8) What Is A Datanode? How Many Instances Of Datanode Run On A Hadoop Cluster?
+Answer :
+- A DataNode stores data in the Hadoop File System HDFS. 
+- Datanodes are the slaves which are deployed on each machine and provide the actual storage. 
+- These are responsible for serving read and write requests for the clients.
+- DataNode instances can talk to each other, this is mostly during replicating data.
+- There is only One DataNode process run on any hadoop slave node. DataNode runs on its own JVM process.  
+
+9) How The Client Communicates With Hdfs? OR How client application interacts with the NameNode?
+Answer :
+- The Client communication to HDFS happens using Hadoop HDFS API. 
+- Client applications talk to the NameNode whenever they wish to locate a file, or when they want to add/copy/move/delete a file on HDFS. 
+- The NameNode responds the successful requests by returning a list of relevant DataNode servers where the data lives. 
+- Client applications can talk directly to a DataNode, once the NameNode has provided the location of the data.
+
+10) If Datanodes Increase, Then Do We Need To Upgrade Namenode? *
+Answer :
+While installing the Hadoop system, Namenode is determined based on the size of the clusters. 
+Most of the time, we do not need to upgrade the Namenode because it does not store the actual data, but just the metadata, so such a requirement rarely arise.
+
+11) What If Rack 2 And Datanode Fails?
+Answer :
+- If both rack2 and datanode present in rack 1 fails then there is no chance of getting data from it. 
+- In order to avoid such situations, we need to replicate that data more number of times instead of replicating only thrice. 
+- This can be done by changing the value in replication factor which is set to 3 by default.
+
+12) If the hardware quality of few machines in a Hadoop Cluster is very low. How will it affect the performance of the job and the overall performance of the cluster?
+There would be an impact on the performance of the jobs. 
+Eg: we have 10 machines in a cluster and out of which 2 have poor hardware quality now when the jobs are submitted the tasks on the 8 machines will complete faster however 
+due to 2 machines slow performance the entire job will be delayed.
+
+13) Explain Name Node?
+Name Node: 
+Name Node is at the heart of the HDFS file system which manages the metadata i.e. the data of the files is not stored on the Name Node 
+but rather it has the directory tree of all the files present in the HDFS file system on a hadoop cluster. 
+Name Node uses two files for the namespace- Fsimage file and Edits file
+Fsimage file- It keeps track of the latest checkpoint of the namespace.
+Edits file-It is a log of changes that have been made to the namespace since checkpoint.
+
+14) Which Are The Three Main Hdfs-site.xml Properties?
+Answer :
+The three main hdfs-site.xml properties are:
+Dfs.name.dir which gives you the location on which metadata will be stored and where DFS is located.
+Dfs.data.dir which gives you the location where the data is going to be stored.
+Fs.checkpoint.dir which is for secondary Namenode
+
+15) Tell Us What Cloudera Is And Why It Is Used In Big Data?
+Answer :
+Cloudera is the leading Hadoop distribution vendor on the Big Data market, 
+Its termed as the next-generation data management software that is required for business critical data challenges 
+that includes access, storage, management, business analytics, systems security, and search
+
+16) What Is The Function Of Hadoop-env.sh? Where Is It Present?
+Answer :
+This file contains some environment variable settings used by Hadoop; 
+It provides the environment for Hadoop to run. 
+The path of JAVA_HOME is set here for it to run properly. 
+Hadoop-env.sh file is present in the conf/hadoop-env.sh location. 
+
+17) What is fstab 
+do you know about scripting?
+Ans:
+- fstab is a system configuration file on Linux and other Unix-like operating systems that contains information about major filesystems on the system. ...
+- The term filesystem can refer to a hierarchy of directories (also called a directory tree) that is used to organize files on a computer system.
+- yes it is automate our most of the work using scripting.
+
+18) Explain what is “map” and what is “reducer” in Hadoop?
+Answer:
+In Hadoop, A map is a phase in HDFS query solving.  A map reads data from an input location, and outputs a key value pair according to the input type.
+In Hadoop, A reducer is collects the output generated by the mapper, processes it, and creates a final output of its own.
+
+19) Mention what is the use of Context Object?
+The Context Object enables the mapper to interact with the rest of the Hadoop system.
+It includes configuration data for the job, as well as interfaces which allow it to emit output.
+
+20) Mention what is rack awareness
+Rack awareness is the way in which the namenode determines on how to place blocks based on the rack definitions.
+All the data nodes put together form a storage area i.e. the physical location of the data nodes is referred to as Rack in HDFS. 
+The rack information i.e. the rack id of each data node is acquired by the NameNode. 

@@ -1,0 +1,194 @@
+176) Which MapReduce version have you configured on your Hadoop cluster?
+Ans. Mapreduce version 2.0
+
+177) What is Job Tracker?
+Answer:	JobTracker is the service within Hadoop that runs MapReduce jobs on the cluster.
+
+178) Which are the process required for YARN?
+Answer:	In YARN the processes are Resource Manager, Node Manager, Application Master, and Container.
+
+179) How many yarn daemons processes run on a Hadoop cluster?
+a. Resource Manager – Master daemon process. &  b. Node Manager - one slave daemon process per node in a cluster
+
+181) Ratio between heap memory for mapper & reducer (Repeat)
+Ans. The Ratio between heap memory for mapper & reducer is 2:1
+
+182) Have you worked in BDR?
+Ans:Yes
+
+183) How will you check a process ID of a service?
+Ans: Using top command either grep particular service u will get pid for that process.
+
+184) How will you check swapiness memory?
+Ans: cat /proc/sys/vm/swappiness
+
+185) 
+How will drop swapiness memory?
+Ans: Set it to zero (0)
+
+186) Location where ranger stores policy
+
+Ans:The user or group information is stored within Ranger portal and used for policy definition.
+
+187) How will you copy a huge file of size 80GB into HDFS parallelly? 
+Using the distCP tools huge files can be copied within or in between various Hadoop clusters. 
+
+188) How will you manually enter and leave Safe Mode in Hadoop? 
+$ Hdfs dfsadmin -safe mode enter  and  $ Hdfs dfsadmin -safe mode leave 
+
+189) Tell me how to like go to ui of namenode?
+A. select nanmenode publice ip open new tab paste there and with namenode port number 50070. and you will see namenode UI.
+
+190) When Name Node is down, what does the Job Tracker do? (repeat)
+When Name node is down the entire cluster is inaccessible, hence the job tracker will also be down.
+
+191) What happens when the mappers fail when a job is run?
+Answer:	The JobTracker will attempt for more 4 times and they fail the job.
+
+192) What is Shuffling in MapReduce?
+The process of transferring data (outputs) from mapper to the reducers is known as Shuffling.
+
+193) how many types of cloudera manager?
+Ans:
+1) basic edition 2) flex edition 3) cloudrea enterprise
+
+194) What is the default port number used to log in to the Ambari Server Web UI?
+Port 8080
+
+195) What is an advantage of starting with a small pilot cluster?
+It may be used for benchmark testing to help determine the proper size of hardware resources
+
+196) What is a key consideration when planning for master nodes?
+Availability 
+
+197) What is a key consideration when planning for worker nodes?
+Throughput
+
+198) What are key considerations when planning the network?
+Avoiding single points of failure and ensuring adequate bandwidth 
+
+199) What Name Node HA function do the Journal Nodes provide?
+They provide shared edits log files to the two Name Nodes.
+
+200) In Name Node HA, a Data Node sends its block reports to which Name Node?
+To both Name Nodes
+
+===================================================================================================================================================
+
+81) First, add the new node's DNS name to the conf/slaves file on the master node.
+Ans. 
+- Then log in to the new slave node and execute 
+- $ cd path/to/hadoop, $ bin/hadoop-daemon.sh start datanode, 
+- $ bin/hadoop-daemon.sh start tasktracker , then issuehadoop dfsadmin -refreshNodes and hadoop mradmin -refreshNodes 
+so that the NameNode and JobTracker know of the additional node that has been added.
+
+82) - What happens if one Hadoop client renames a file or a directory containing this file while another client is still writing into it?
+Ans. 
+- A file will appear in the name space as soon as it is created. 
+- If a writer is writing to a file and another client renames either the file itself or any of its path components, 
+then the original writer will get an IOException either when it finishes writing to the current block or when it closes the file.
+
+83) How to make a large cluster smaller by taking out some of the nodes?
+Ans. 
+- Hadoop offers the decommission feature to retire a set of existing data-nodes. 
+- The nodes to be retired should be included into the exclude file, and the exclude file name should be specified as a configuration parameter dfs.hosts.exclude. 
+- The decommission process can be terminated at any time by editing the configuration or the exclude files and repeating the -refreshNodes command
+
+84) What happens when two clients try to write into the same HDFS file?
+Ans. 
+- HDFS supports exclusive writes only. When the first client contacts the name-node to open the file for writing, the name-node grants a lease to the client to create this file. 
+- When the second client tries to open the same file for writing, the name-node will see that the lease for the file is already granted to another client, and will reject the open request for the second client
+
+85) What is a Combiner?
+Ans. 
+- The Combiner is a 'mini-reduce' process which operates only on data generated by a mapper. 
+- The Combiner will receive as input all data emitted by the Mapper instances on a given node. 
+- The output from the Combiner is then sent to the Reducers, instead of the output from the Mappers
+
+86) If you get a connection refused exception - when logging onto a machine of the cluster, what could be the reason? How will you solve this issue?
+The port is not open on the destination machine.
+The port is open on the destination machine, but its backlog of pending connections is full.
+A firewall between the client and server is blocking access, to disable use “$sudo ufw disable” (firewall in Ubuntu can’t be disable because it is part of kernel)if this doesn’t work then try “sudo service iptables stop”
+
+87) If the Hadoop services are running slow in a Hadoop cluster, what would be the root cause for it and how will you identify it?
+Eg 1: A particular task is using a lot of memory which is causing the slowness or failure, I will look for ways to reduce the memory usage. 
+We can also increase the memory requirements needed by the map and reduce tasks by setting – mapreduce.map.memory.mb and mapreduce.reduce.memory.mb
+
+88) Why use hadoop when the amount of incoming data is 30 or 40 GB?
+Oracle supports upto 1 TB, however the size of the incoming data is not going to be limited to 30 GB it will be increasing with time 
+so there would be a point when oracle is not able to support and then if you go to buy another oracle machine which would cost you around 55,000 dollars. 
+Moreover the data which is flowing in is not limited to structured format (only format which is supported by oracle) it contains xml & logs also and we all know that semi-structed & unstructured data can be stored & processed only in hadoop. 
+
+89) How can a log file be processed as it is unstructured ?
+From github we got the jar file which helped us process this unstructured data. It was like 4 lines command in pig which helped us clean the data. 
+Depends on the type of logs you need to select the right jar, after ETL which is done by pig the data is cleaned and it comes in format which can be loaded in hive metastore for the analyst to do the analysis.
+
+90) What is RM,NM, AM, Container ?
+Answer: 
+1. RM : As previously described, ResourceManager (RM) is the master that arbitrates all the available cluster resources and thus helps manage the distributed applications running on the YARN system. 
+2. NM : NodeManagers take instructions from the ResourceManager and manage resources available on a single node.
+3. AM : ApplicationMasters are responsible for negotiating resources with the ResourceManager and for working with the NodeManagers to start the containers.
+4. Container : It is a combination of Cores and RAM which allow an application to run as all the applications require RAM and cores to run.
+
+91) - What are Problems with small files and HDFS?
+Ans. 
+- HDFS is not good at handling large number of small files. 
+- Because every file, directory and block in HDFS is represented as an object in the namenode's memory, each of which occupies approx 150 bytes So 10 million files, each using a block, would use about 3 gigabytes of memory. 
+- when we go for a billion files the memory requirement in namenode cannot be met.
+
+92). - Why is Checkpointing Important in Hadoop?
+Ans. 
+- As more and more files are added the namenode creates large edit logs. 
+- Which can substantially delay NameNode startup as the NameNode reapplies all the edits. 
+- Checkpointing is a process that takes an fsimage and edit log and compacts them into a new fsimage. 
+- This way, instead of replaying a potentially unbounded edit log, the NameNode can load the final in-memory state directly from the fsimage. 
+- This is a far more efficient operation and reduces NameNode startup time.
+
+93) - Why use Bootstrap?
+Ans. 
+- Bootstrap can be used as - Mobile first approach - Since Bootstrap 3, the framework consists of Mobile first styles throughout the entire library instead of in separate files. 
+- Browser Support - It is supported by all popular browsers. Easy to get started - With just the knowledge of HTML and CSS anyone can get started with Bootstrap. 
+- Also the Bootstrap official site has a good documentation. Responsive design - Bootstrap's responsive CSS adjusts to Desktops,Tablets and Mobiles. 
+- Provides a clean and uniform solution for building an interface for developers. It contains beautiful and functional built-in components which are easy to customize. 
+- It also provides web based customization. And best of all it is an open source.
+
+94) Write the full command to creat sentry roles.
+Ans:You can crrate roles using command
+1.CREATE ROLE `role_name`;
+2.CREATE ROLE  `hadoop-developer_role`;
+
+For droping roles.
+1.DROP ROLE `role_name`;
+2.DROP ROLE  `hadoop-developer_role`;
+
+95) What is kernel
+Kernel is the main component of a computer operating systems. 
+It provides an interface between applications and actual data processing at the hardware level. 
+It is the part of the operating system that loads first, and it remains in main memory. typically, the kernel is responsible for memory management, process and task management, and disk management. If you type a command from the terminal then the kernel interprets that command to the hardware it’s a communicator.
+
+96) How does NameNode tackle DataNode failures?
+All the data nodes periodically send notifications a.k.a Heartbeat signal to the NameNode, which implies that the DataNode is alive. 
+Apart from Heartbeat, NameNode also receives Block report from DataNodes, which consists of all the blocks on a DataNode. 
+In case NameNode does not receive this, it marks that DataNode as a dead node.As soon as the DataNode is marked as non-functional or dead, block transfer is initiated to the DataNode with which replication was done initially.
+
+97) What happens when a datanodefails ?
+When a datanode fails
+•	Jobtracker and namenode detect the failure
+•	On the failed node all tasks are re-scheduled
+•	Namenode replicates the users data to another node
+
+98) What are the additional benefits YARN brings in to Hadoop?
+Effective utilization of the resources as multiple applications can be run in YARN all sharing a common resource. 
+In Hadoop Map Reduce there are separate slots for Map and Reduce tasks whereas in YARN there is no fixed slot. The same container can be used for Map and Reduce tasks leading to better utilization.
+YARN is backward compatible so all the existing Map Reduce jobs.
+Using YARN, one can even run applications that are not based on the Mar educe model
+
+99) Difference between Application Manager & Application Master.
+Ans. Application Master is the main container requesting, launching and monitoring application specific resources, whereas 
+Application Manager is a component inside ResourceManager. The ApplicationsManager is responsible for maintaining a collection of submitted applications. 
+After application submission it first validates the application’s specifications and rejects any application if there is no node in the cluster that has enough resources to run the ApplicationMaster itself. 
+It then ensures that no other application was already submitted with the same application ID—This component is also responsible for recording and managing finished applications for a while before they are completely evacuated from the ResourceManager’s memory.
+
+100) What is Apache Pig?  
+It is a high-level platform for extracting, transforming, or analyzing large datasets. 
+Pig includes a scripted, procedural-based language that excels at building data pipelines to aggregate and add structure to data. Pig also provides data analysts with tools to analyze data.

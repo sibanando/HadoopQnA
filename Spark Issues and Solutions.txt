@@ -1,0 +1,152 @@
+Issues and Solutions
+
+1. Too many open files
+
+This issue(Too many open files) is fixed by setting ulimit to 10000  or there can be corrupted disks on unix servers
+
+:Caused by: org.apache.kafka.common.KafkaException: java.io.IOException: Too many open files in system
+:Caused by: java.io.IOException: Too many open files in system
+:Caused by: org.apache.kafka.common.KafkaException: java.io.IOException: Too many open files in system
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+2. Failed to send rpc
+
+https://thebipalace.com/2017/08/23/spark-error-failed-to-send-rpc-to-datanode/
+
+
+These errors basically mean the connection between Spark driver and executors are broken, mainly because executor is killed. 
+This could happen because of a number of reasons:
+
+i- cluster is too busy and has hit maximum usage.
+We realized this happens a lot more often when our cluster is too busy and has hit maximum usage. 
+What it means is that executors are accepted to DataNodes, but they fail to acquire enough memory on the datanode and therefore get killed.
+
+
+ii- Metaspace attempts to grow
+Metaspace attempts to grow beyond the executor(JVM) memory limits, resulting in loss of executors.
+The best way to stop this error from appearing is to set below properties when launching Spark-Shell or submitting application using spark-submit:
+
+spark.driver.extraJavaOptions = -XX:ReservedCodeCacheSize=100M-XX:MaxMetaspaceSize=256m
+-XX:CompressedClassSpaceSize=256m
+spark.executor.extraJavaOptions = -XX:ReservedCodeCacheSize=100M
+-XX:MaxMetaspaceSize=256m
+-XX:CompressedClassSpaceSize=256m
+Please note that depending on your project and code, you may need to increase the values mentioned above.
+
+
+iii- Network is slow
+Network is slow for whatever reason. In our case, this was caused by a change in DNS which resulted in turning off caching.
+This case could be fixed by adjusting spark.executor.heartbeatInterval and spark.network.timeout. 
+Default values for these 2 parameters are 10s and 120s. 
+You can adjust these 2 values based on how your network, the only point to consider here is that the later property, spark.network.timeout, should be greater than the first one.
+
+From <https://thebipalace.com/2017/08/23/spark-error-failed-to-send-rpc-to-datanode/> 
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+3.Container killed by YARN for exceeding memory limit
+
+Error : 
+Container killed by YARN for exceeding memory limits. 5.0 GB of 5 GB physical memory used. Consider boosting spark.yarn.executor.memoryOverhead
+
+https://hvivani.com.ar/2016/03/20/consider-boosting-spark-yarn-executor-memoryoverhead/
+
+Each executor is allocated 6g of memory 3 cores. so, for each core, 2g of memory would be available. that's how you should view this 
+
+By default ‘spark.yarn.executor.memoryOverhead’ parameter is set to 384 MB. This value could be low depending on your application and the data load.
+Suggested value for this parameter is ‘executorMemory * 0.10’.
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+4. Failed to bind SparkUI
+
+ ERROR SparkUI: Failed to bind SparkUI
+
+java.net.BindException: Address already in use: Service 'SparkUI' failed after 16 retries (starting from 4303)! Consider explicitly setting the appropriate port for the service 'SparkUI' (for example spark.ui.port for SparkUI) to an available port or increasing spark.port.maxRetries.
+
+
+You can resolve it either following any one of following solutions:
+Solution-1: Set Spark UI Port explicitly as shown below
+spark-shell --conf “spark.ui.port=10101”
+//Here we are explicitly setting spark ui port to some random port which is not in use in above example I chosen 10101but you can choose any proper port number
+
+
+Solution-2: Increase spark.port.maxRetries as shown below
+spark-shell --conf “spark.port.maxRetries=100”
+//Here we are setting spark.port.maxRetries to 100 so it will try maximum of 100 instead of 16 to find some unused port
+
+
+We give each jobs port nos at 20 nos gap and it is success
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+5. For increasing performance of spark jobs and to avoid over memory utilization at cluster level, admin increased this 
+
+<property>
+<name>yarn.scheduler.minimum-allocation-mb</name>
+<value>2048</value>
+</property> 
+
+====================================================================*******************************====================================================================================
+6. This is where yarn executor logs are aggregated into spark HDFS folder(before that yarn executor logs will be stored in local(/hadoop/yarn/log) of each executor nodes and when the spark app is completed, they will be removed from local into below 
+Spark HDFS folder)
+
+
+   <property>
+      <name>yarn.nodemanager.remote-app-log-dir</name>
+      <value>/app-logs</value>
+    </property>
+
+
+Note: 
+Before that Log Aggregation is YES in a property in yarn-site.xml file
+
+====================================================================*******************************====================================================================================
+===================================================================================================================================================================================================================
+Cassandra low performance impacts spark job to run slow(write time to cassandra is so delay)
+
+
+Steps to Check Cassandra write time
+	1) Go to yarn console and click on a running application link.
+	2) Click on an “attempt” link.
+	3) Click on the “logs” link for one of the executors.
+	4) Click on “stderr” link
+	5) Note the start offset in the url which is for display purposes.
+	6) Change it to a larger negative number so you can see more of the log 
+	(e.g. -4096  ->  -20000).  Then search on the page for the word “wrote” to find various db write times entries.
+	
+	
+	
+===================================================================================================================================================================================================================
+
+===================================================================================================================================================================================================================
+Manjunath Ballur
+
+https://stackoverflow.com/questions/33866888/aggregate-resource-allocation-for-a-job-in-yarn
+https://stackoverflow.com/questions/34794753/get-the-memory-cpu-and-disk-usage-for-yarn-application?noredirect=1&lq=1
+https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-site/YarnCommands.html
+
+https://github.com/jaceklaskowski/mastering-apache-spark-book/blob/master/yarn/spark-yarn-applicationmaster.adoc
+
+https://community.hortonworks.com/questions/59933/issue-with-setting-up-spark-clients-without-ambari.html
+
+https://stackoverflow.com/questions/18192443/how-to-clean-the-hadoop-hdfs-logs-under-var-log-hadoop-hdfs
+
+https://stackoverflow.com/questions/21621755/where-does-hadoop-store-the-logs-of-yarn-applications
+
+https://stackoverflow.com/questions/22856958/hadoop-logs-value-of-environment-variable-hadoop-log-dir
+
+https://stackoverflow.com/questions/40372655/how-to-set-spark-local-dir-property-from-spark-shell
+
+https://community.hortonworks.com/questions/93190/how-to-refresh-hvie-agent-configure-without-restar.html
+
+https://www.ibm.com/support/knowledgecenter/SSPT3X_4.1.0/com.ibm.swg.im.infosphere.biginsights.admin.doc/doc/admin_chgalert.html
+
+https://www.ibm.com/support/knowledgecenter/SSPT3X_4.1.0/com.ibm.swg.im.infosphere.biginsights.admin.doc/doc/ambari_views.html
+
+https://www.youtube.com/results?search_query=how+spark-submit+job+uses+HDFS+data
+
+https://dzone.com/articles/apache-spark-on-yarn-performance-and-bottlenecks
+
+
+http://crazyadmins.com/tune-hadoop-cluster-to-get-maximum-performance-part-1/

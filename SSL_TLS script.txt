@@ -1,0 +1,147 @@
+Export cloudera jdk path to ~/.bashrc file
+
+export JAVA_HOME=/usr/java/jdk1.7.0_67-cloudera
+export PATH=$JAVA_HOME/bin:$PATH
+
+To ensure that you have imported java path use below command.
+
+java –version
+echo $JAVA_HOME
+jps
+-----------------------------------------------------------------------------------------------------------------------
+Create a directory to store a to-be-created self-signed certificate-key pair.
+
+mkdir -p /opt/cloudera/security/{x509,jks,CAcerts}
+chown -R cloudera-scm:cloudera-scm /opt/cloudera/security
+
+x509-: This directory will store .pem key
+jks-: will store keystore of certificate
+-----------------------------------------------------------------------------------------------------------------------
+keytool -genkeypair -keystore cms.keystore -keyalg RSA -alias cms -dname CN=ip-172-31-92-128.ec2.internal -storepass cloudera -keypass cloudera -validity 365
+
+ls /opt/cloudera/security/jks
+
+It will create one keystore by the name cms.keystore under jks folder.
+----------------------------------------------------------------------------------------------------------------------
+Now we need to export certificate as .cer 
+
+(1.4)  
+
+It will store in this location after firing below query -: ls /opt/cloudera/security/
+
+keytool -export -alias cms -keystore cms.keystore -rfc -file /opt/cloudera/security/selfsigned.cer -storepass cloudera
+
+----------------------------------------------------------------------------------------------------------------------
+By default java jdk has default certificate i.e cacerts, so we take backup of this certificate by the name jssecacerts
+
+cp $JAVA_HOME/jre/lib/security/cacerts $JAVA_HOME/jre/lib/security/jssecacerts
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+Copy the self-signed certificate to the /opt/cloudera/security/x509/ directory (or any other location where it can be used by Cloudera Manager).
+
+Now we will convert selfsigned.cer into .pem key
+
+
+cp /opt/cloudera/security/selfsigned.cer /opt/cloudera/security/x509/cmhost.pem 
+
+ll /opt/cloudera/security/x509
+
+chown cloudera-scm:cloudera-scm /opt/cloudera/security/x509/cmhost.pem
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+Important: Copy selfsigned.cer file to all cluster nodes to /tmp directory (using scp or sftp) and perform further steps on all cluster nodes.
+
+Import the public key into the alternate Java truststore, so that any process running with Java on this machine trusts the key (this is needed, for example, for Cloudera Management Services). Default password for Java truststore is changeit (DO NOT change it in the command). Before running the following command, make sure that JAVA_HOME points to Oracle JDK.
+
+cp /opt/cloudera/security/selfsigned.cer /tmp/
+
+before importing cross-check whether that certificate is copied to /temp folder
+(1.8)
+jssecacerts java certificate has default password i.e changeit
+
+keytool -import -alias cms -file /tmp/selfsigned.cer -keystore $JAVA_HOME/jre/lib/security/jssecacerts -storepass changeit
+
+When you import certificate it will prompt you below message yes or no--: type yes then only the certificate will get imported successfully 
+
+Owner: CN=ip-172-31-92-128.ec2.internal
+Issuer: CN=ip-172-31-92-128.ec2.internal
+Serial number: 5a248d35
+Valid from: Tue Feb 27 09:49:03 UTC 2018 until: Wed Feb 27 09:49:03 UTC 2019
+Certificate fingerprints:
+         MD5:  3F:A5:6A:9A:A0:E8:62:8C:F8:6B:6F:81:6F:3F:A6:1E
+         SHA1: 77:1F:9C:38:86:54:89:06:66:82:66:14:95:49:13:6D:0F:9B:AF:3C
+         SHA256: BF:3B:76:2A:36:33:1E:36:2D:78:78:4C:BB:E8:3B:5A:37:06:F8:D1:CA:E6:C3:A6:31:B4:59:C0:F8:CF:1F:64
+         Signature algorithm name: SHA256withRSA
+         Version: 3
+
+Extensions:
+
+#1: ObjectId: 2.5.29.14 Criticality=false
+SubjectKeyIdentifier [
+KeyIdentifier [
+0000: FB 28 EE 9A FC A8 EA 1C   DD 16 CA F3 27 8A 40 70  .(..........'.@p
+0010: 82 F1 59 CE                                        ..Y.
+]
+]
+Trust this certificate? [no]:yes
+
+When you enter yes your self-signed Certificate will get added to keystore.
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+rm -f /tmp/selfsigned.cer                       - No idea why to remove
+
+
+
+Your CLI part is successfully done. now go to cm on web browser.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Step 2. Enable HTTPS for the Cloudera Manager Admin Console
+
+
+1. Log in to Cloudera Manager Admin Console and go to Administration -> Settings -> Security.
+Configure these settings:
+
+•	Use TLS Encryption for Admin Console - check the box
+•	Cloudera Manager TLS/SSL Server JKS Keystore File Location or check for Path to TLS Keystore File  -/opt/cloudera/security/jks/cms.keystore
+•	Keystore Password - cloudera (use the password from Step 1.4./ export one)
+Cloudera Manager TLS/SSL Server JKS Keystore File Password-: cloudera
+
+2.2. Click Save Changes to save settings (do not restart Cloudera Manager Server as for now).
+2.3. Go to Cloudera Management Services -> Configuration and set the following two parameters:
+
+
+•	TLS/SSL Client Truststore File Location -/usr/java/jdk1.7.0_67-cloudera/jre/lib/security/jssecacerts
+•	TLS/SSL Client Truststore File Password - changeit (the password from Step 1.8.)
+
+
+2.4. Click Save Changes and restart Cloudera Management Services.
+2.5. Log in to Cloudera Manager Server host and restart CMS:
+
+sudo service cloudera-scm-server restart
+ 
+2.6. Verify if Cloudera Manager Admin Console redirects connection from HTTP port 7180 to HTTPS port 7183.
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Step 3. Configuring TLS Level 1 encryption for Cloudera Manager Agents
+
+3.1. Log in to Cloudera Manager Admin Console and go to Administration -> Settings -> Security.
+Configure this setting:
+•	Use TLS Encryption for Agents - check the box
+3.2. Click Save Changes and restart CMS:
+sudo service cloudera-scm-server restart
+ 
+3.3. On every cluster node where Cloudera Manager Agent is running, run the following command:
+
+sudo sed -i 's|use_tls=0|use_tls=1|g' /etc/cloudera-scm-agent/config.ini
+
+sudo service cloudera-scm-agent restart
+ 
+3.4. In the Cloudera Manager Admin Console, open the Hosts page. If the Agent successfully provides a heartbeat, TLS encryption works properly.
+
+
+
+

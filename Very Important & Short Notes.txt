@@ -1,0 +1,529 @@
+Very Important & Short Notes
+=======================
+
+Configuration files with working:
+=========================
+
+1) core-site.xml -- contains values for core Hadoop properties e.g. fs.trash.interval
+2) hdfs-site.xml -- controls the behavior of all HDFS-related Hadoop components, such as the NameNode, Secondary NameNode and the DataNodes.
+                               dfs.replication, dfs.namenode.name.dir, dfs.block.size
+3) yarn-site.xml -- Configuring YARNworking of NN, SNN and Checkpointing, DN, JHS, RM, NM, JN
+
+Hadoop configuraton files:
+====================
+1.yarn-default.xml
+2.core-default.xml
+3.hdfs-default.xml
+4.mapred-default.xml
+
+Difference between MR1 & MR2.:
+=========================
+1) Job Tracker : - Scheduling job/tasks & monitoring their progress.
+
+2) Yarn : Resource Manager :- Manage Resources across cluster & Application master launches container and monitors their progress.	
+
+                      MR1					MR2
+-	Job Tracker 			- Resource Manager / Application Master
+-	Task Tracker			- Node Manager
+-	Slots				- Containers
+-	Job history server			- Timeline server (not yet implemented)
+-	4000 nodes			- 10,000 nodes
+-	40,000 tasks			- 100,000 tasks
+
+Port numbers used by all Hadoop components and services
+=============================================
+
+1) DataNode 1004, 50020
+2) NameNode 50070
+3) JournalNode 8485 8480
+4) ResourceManager8088
+5) JobHistoryServer 19888(external)
+6) NodeManager 8042
+7) Hive Metastore 9083
+8) HiveServer2 10002
+9) Zookeeper 2181
+10) ZKFC 8019(internal)
+11) Hue 8888
+12) MySQL 3306
+
+Memory Heapsize:
+==============
+•	By default Hadoop allocates 1000 MB of memory to each daemon it runs.
+•	This is done by the property “Hadoop_HEAPSIZE” in hadoop-env.sh file i.e. /etc/hadoop/conf/hadoop_env.sh
+•	To change heapsize of single daemon we have environment variable.
+•	To change Resource Manager’s heap size use property “Yarn.Resourcemanager.Heapsize” in yarn-env.sh file i.e. /etc/hadoop/conf/yarn-env.sh
+•	To change namenode heapsize memory use “HADOOP.NAMENODE_OPTS” in Hadoop-env.sh i.e /etc/hadoop/conf/hadoop-env.sh
+
+Safe Mode:
+=========
+•	When the Namenode starts the first thing it does is it loads the fsimage into memory and apply the edits from the edit logs.
+•	Once it has reconstructed it creates a new fsimage file and an empty edit log
+•	Doing the checkpointing itself.
+•	During this entire process the Namenode is running in “Safe Mode”
+•	Safe mode is also know as “Read only mode” as writes cannot be done when namenode is in safe 
+
+Corrupted Blocks:
+==============
+•	HDFS stores replicas of blocks, it can heal corrupted blocks by coping one of the good replica to produce a new uncorrupted replica.
+•	The way it is works is : if a client detects an error when reading a block, it reports the bad block & the data node it was trying to read from to the Namenode.
+•	The Namenode will then mark that block as corrupt so that it does not direct any more clients to it or try’s  to copy this corrupted replica to another datanode.
+•	It then schedules a copy of block to be replicated on another datanode, so that it’s replication factor is back to the expected level. Once this is done the corrupt replica is then deleted.
+
+HA : NN is not able to serve request until:
+================================
+•	Its loaded its Namespace into its memory
+•	Replayed its edit’s log
+•	Received enough block reports from the datanodes to leave the safemode state.
+•	The NN must use highly available shared storage to store the edit logs.
+•	Datanode must send the Block report to both the NN’s because the block mappings are stored in a NN memory & NOT ON DISK.
+•	The Journal node is setup for the sole purpose of providing a highly available edit logs.
+•	HDFS HA does use zookeeper for electing the active Namenode.
+•	The transition from the Active Namenode to standby Namenode is managed by failover controller i.e zookeeper to ensure only one Namenode is Active.
+
+Admin Task :  
+==========
+• If a task fails for 4 times , it will not be retried again.
+• If any task fails for 4 consecutive times, the whole job fails.
+• Killed tasks are not counted against the number of attempts to run the task.
+
+Application Manger : - The maximum number of reattempts to run an “Application Master”  is set by “yarn.resourcemanager.am.max-attempts” property which is 2 by default. : 
+•	The Application Master sends the heartbeat signal to the resource manager.
+
+Node Manager : - If a Node Manager fails by crashing or running very slowly, it’ll stop sending heartbeats to the “Resource Manager”
+-	Resource Manager will notice a Node Manager has stopped sending heartbeat if it hasn’t received one for 10 min.
+
+Resource Manager : - It is a very important component in the entire cluster. We can use HA by running          pair of Resource Manager in Active & Standby node with the help of Zookeeper.
+
+Balancer : - Balancer program is a Hadoop daemon that redistributes blocks by moving them from over utilized data nodes to underutilized data nodes 
+	Start-balancer.sh
+
+
+1) Adding additional storage to HDFS
+=============================
+-dfs.datanode.datadir in hdfs-site.xml
+
+2) Configure and manager Trash
+=========================
+-fs.trash.interval>0
+-fs.trash.checkpointing.interval>0
+-hdfsdfs -expunge to clear trash
+
+3) Performance tuning
+==================
+distcp
+-hdfsdistcp<input path><output path>
+Manage replication factor 
+-hdfsdfs -setrep -w 3 <filename>
+
+4) Set quota
+=========
+-hdfsdfsadmin -setSpaceQuota<path><space in mb>
+-hdfsdfsadmin -setquota 10 <directory quota>
+Get HDFS status report
+-hdfsfsck<path>
+-hdfsdfsadmin -report.
+-hdfsdfsadmin -report -live.
+
+File name for configuring Scheduler:
+============================
+•	Capacity-scheduler.xml  
+•	Fair-scheduler.xml
+
+Job Scheduler :-
+============
+•	The FIFO scheduler places application in a queue and run them as per the order of submission
+•	Capacity Scheduler  : A separate dedicated queue allows the small jobs to start as soon as it is submitted.
+•	Fair Scheduler : There is no need to reserve a set of amount of capacity, since it will dynamically balance resources between all running jobs.
+
+Configure HA 
+===========
+
+1) Components to add
+=================
+The ZooKeeper Failover Controller (ZKFC) controls the NameNode failover process.
+JNs hold the shared edit logs.
+A pair of NameNodes run in an the active/standby mode.
+
+2) Configurations in hdfs-site.xml
+==========================
+dfs.nameservices – prodcluster
+fs.defaultFS–hdfs://prodcluster
+dfs.ha.namenodes.prodcluster -- 
+dfs.namenode.shared.edits.dir -- qjournal://node1.example.com:8485;
+ node2.example.com:8485;
+ node3.example.com:8485/prodcluster
+dfs.journalnode.edits.dir -- /path/to/journal/node/local/data
+dfs.namenode.rpc-address.prodcluster.nn1 and nn2
+dfs.namenode.http-address.prodcluster.nn1 and nn2
+
+3) Fencing
+========
+dfs.ha.fencing.methods
+dfs.ha.fencing.ssh.private-key-files (for sshfencing)
+
+4) Commands for Deployment
+========================
+$ mkdir –p /var/data/dfs/jn
+$ chown –R hdfs:hadoop /var/data/dfs/jn-- Creating and granting permissions to edits dir of JN
+$ hdfs hadoop-daemon.sh start journalnode-- start journalnode service
+$ hdfsnamenode –initializeSharedEdits –force -- initialize journalnode with latest edits log
+$ hdfsnamenode –bootstrapStandby –force  -- bootsrap new nn before starting it  (synchronise metadata between active/standby namenode)
+bootstrapStandby command gets the checkpointedfsimage file from thefirst NameNode, nn1. 
+It also makes sure that nn2 has received all the corresponding edit logs from the JournalNodes.
+$ hdfszkfc –formatZK -force --	znode in the ZooKeeper server that tracks the status (active/Standby) of your NameNodes
+$ /usr/lib/hadoop/sbin/hadoop-daemon.sh start namenode-- start up first namenode
+$ /usr/lib/hadoop/sbin/hadoop-daemon.sh start namenode-- start up second namenode
+$ su - hdfs –c "/usr/lib/hadoop/sbin/hadoop-daemon.sh –config-- start all datanodes
+							/etc/hadoop/conf start datanode"
+Restart all the NodeManagers, the JobHistoryServer and the ResourceManager
+$ hdfshaadmin -getServiceState nn1 -- get status of nn
+$ hdfshaadmin –failover –forcefence- –forceactive nn2 nn1
+$ hdfshaadmin –failover –forcefence- –forceactive nn2 nn1 -- transiting one of nn as active
+$ hdfsgetconf -namenodes-- verify HA configured
+
+5) Summary of the HA NameNode configuration:
+=====================================
+There are two NameNodes, on hadoop1 and hadoop2, in an active/passive configuration.
+There are three JournalNodes, one on each of the three nodes of my cluster.
+The ZKFC daemons run on the same nodes as the two NameNodes, to support automatic failover.
+There are three ZooKeeper servers, to provide a quorum to support the ZKFC daemons.
+
+
+YARN administration
+================
+
+Complete workflow of YARN and RM
+============================
+1)Key functions of the ResourceManager:
+---------------------------------------------------------
+•	Creates the first container for an application. This is the container in which the
+ApplicationMaster for the application will run.
+•	Tracks the heartbeats from the NodeManagers to manage the DataNodes.
+•	Runs a Scheduler to determine resource allocation among the clusters.
+•	Manages cluster level security.
+•	Manages the resource requests from the ApplicationMasters.
+•	Monitors the status of the ApplicationMaster and restarts that container upon its failure.
+•	Deallocates the containers when the application completes or after they expire.
+
+2) NodeManager
+-----------------------
+•	Communicates with the global ResourceManager through health heartbeats and container status notifications.
+•	Registers and starts the application processes.
+•	Launches both the ApplicationMaster and the rest of an application’s resourcecontainers (that is, the map and reduce tasks that run in the containers) on requestfrom the ApplicationsManager.
+•	Oversees the lifecycle of the application containers.
+•	Monitors, manages and provides information regarding the resource consumption(CPU/memory) by the containers.
+•	Tracks the health of the DataNodes.
+•	Monitors container resource usage and kills runaway processes.
+•	Handles log management by aggregating the job logs and saving them to HDFS.
+•	Provides auxiliary services to YARN applications. Auxiliary services are applicationsthat provide services to applications and are used by the MapReduceframework for its shuff le and sort operations.
+•	Maintains security at the node level.
+
+3) ApplicationMaster
+-----------------------------
+•	Managing task scheduling and execution
+•	Allocating resources locally for the application’s tasks
+
+4) The JobHistoryServer
+----------------------------------
+There’s a single JobHistoryServer for the entire cluster. The JobHistoryServer archivesall YARN job metrics and their metadata and is exposed through the JobHistoryServerweb UI. The cluster will run fine without the JobHistoryServer, but you won’t be ableto easily access the job logs and job history without it.
+
+
+YARN commands
+=============
+- mradmin job list -all
+- mradmin job status <job-id>
+- mradmin job -set-priority <job-id>
+- mradmin job -kill-task <task-id>
+- mradmin job -history
+
+Job schedulers (fair and capacity)
+==========================
+Fair Scheduler
+===========
+1) In yarn-site.xml
+-------------------------
+• yarn.scheduler.fair.allow-undeclaredpools -- When set to true, the Fair Scheduler uses the username as the default pool name
+• yarn.scheduler.fair.user-as-defaultqueue -- When set to true, pools specified in applications but not explicitly configured, are created at runtime with default settings.
+• yarn.scheduler.fair.preemption -- When enabled, under certain conditions, the Fair Scheduler preempts applications in other pools (Default: false)
+• yarn.scheduler.fair.preemption.clusterutilization-threshold -- The cluster utilization threshold above which preemption is triggered Default: .8
+
+2) In fair-scheduler.xml
+--------------------------------
+• queuePlacementPolicy	                      --            Policy for assigning jobs to resource pools. [in CM placement rules.]
+• userMaxAppsDefault                                     --	Default running app limit for a user whose limit is not otherwise specified [in CM user limits]
+• queueMaxAppsDefault		    --	Default running app limit for pools
+• queueMaxAMShareDefault	                      --	Default ApplicationMaster resource limit for the pool
+• defaultFairSharePreemptionThreshold	    --	Fair share preemption threshold for pools
+• defaultFairSharePreemptionTimeout	    --	Default number of seconds a resource pool is under its fair share before it will preempt containers to takeresources from other resource pools
+• defaultMinSharePreemptionTimeout	    --	Default number of seconds a resource pool is under its minimum share before it will preempt containers to takeresources from other resource pools
+• defaultQueueSchedulingPolicy                     --	Default scheduling policy for pools Default: drf
+	
+3) Configuration of queue
+------------------------------------
+• weight	--	Weight given to the resource pool when determining how to allocate resources relative to other resource pools [in CM configuration sets]
+• schedulingPolicy --	Policy to determine how resources are allocated to the resource pool: fair, fifo, or drf.
+• aclSubmitApps	--	Users and groups that can submit jobs to the pool
+• aclAdministerApps	--	Users and groups that can administer the pool
+• minResources, maxResources -- Minimum and maximum share of resources that can allocated to the resource pool in the form X mb, Y vcores
+• maxAMShare -- Fraction of the resource pool's fair share that can be used to runApplicationMaster
+
+EcoSystem
+=========
+1) Apache Flume:  is a distributed, reliable, and available service that efficiently collects, aggregates, and moves streaming data. It is a distributed service because it can can be deployed across many systems. The benefits of a distributed system include increased scalability and redundancy. It is reliable because its architecture and components are designed to prevent data loss. It is highly-available because it uses redundancy to limit downtime.
+
+2) Apache Hive:  is a data warehouse infrastructure built on top of Hadoop. It was designed to enable users with database experience to analyze data using familiar SQL-based statements. Hive includes support for SQL:2011 analytics. Hive and its SQL-based language enable an enterprise to utilize existing SQL skillsets to quickly derive value from a Hadoop deployment.
+
+3) Apache Pig:  is a high-level platform for extracting, transforming, or analyzing large datasets. Pig includes a scripted, procedural-based language that excels at building data pipelines to aggregate and add structure to data. Pig also provides data analysts with tools to analyze data.
+
+4) Apache Sqoop: is a collection of related tools. The primary tools are the import and export tools. Writing your own scripts or MapReduce program to move data between Hadoop and a database or an enterprise data warehouse is an error prone and non-trivial task. Sqoop import and export tools are designed to reliably transfer data between Hadoop and relational databases or enterprise data warehouse systems. 
+
+5) Apache Kafka:  is a fast, scalable, durable, and fault-tolerant publish-subscribe messaging system. Kafka is often used in place of traditional message brokers like Java Messaging Service (JMS) or Advance Message Queueing Protocol (AMQP) because of its higher throughput, reliability, and replication. 
+
+6) Apache Knox:  is a perimeter gateway protecting a Hadoop cluster. It provides a single point of authentication into a Hadoop cluster.
+
+7) Apache Ranger: is a centralized security framework offering fine-grained policy controls for HDFS, Hive, HBase, Knox, Storm, Kafka, and Solr. Using the Ranger Console, security administrators can easily manage policies for access to files, directories, databases, tables, and columns. These policies can be set for individual users or groups and then enforced within Hadoop.
+
+1) Flume
+=======
+
+Configuration, Architecture and working of flume
+======================================
+-BatchSize -- number of events to be passed to the source at one time (larger batch size larger performance but if one batch is lost all data within than batch will be lost)
+-Channel Capacity -- maximum capacity number of events of the channel -- 10000
+-Channel Transaction Capacity -- max no. of events stored in the channel per transaction -- 100
+Channel transaction capacity will need to be smaller than the channel capacity
+
+Flume events and agents
+===================
+- event means data
+-agent is collections of one source channel and sinktypes of sources, channels and sinks
+- avro source
+- memory channel 
+	- hdfs sinks
+
+Sample configuration for Load Balancing
+================================
+agent.sinkgroups = load-balancer-sink-group
+agent.sinks = avro-sink-1 avro-sink-2
+
+# Define sink group for load balancing
+-----------------------------------------------------
+agent.sinkgroups.load-balancer-sink-group.sinks = avro-sink-1 avro-sink-2
+agent.sinkgroups.load-balancer-sink-group.processor.type = load_balance
+agent.sinkgroups.load-balancer-sink-group.processor.selector = random
+
+# avro-sink-1 properties
+----------------------------------
+agent.sinks.avro-sink-1.type = avro
+agent.sinks.avro-sink-1.hostname = host1.example.com
+agent.sinks.avro-sink-1.port = 4040
+
+# avro-sink-2 properties
+----------------------------------
+agent.sinks.avro-sink-2.type = avro
+agent.sinks.avro-sink-2.hostname = host2.example.com
+agent.sinks.avro-sink-2.port = 4040
+
+Configuration of memory channel to HDFS (In Detail Working)
+================================================
+Sink Type		Config parameter 				Typical value
+Avro 			batch-size					100
+HDFS 			hdfs.batchSize, hdfs.txnEventMax		1000
+HBaseSink		batchSize					100
+AsyncHBaseSink	batchSize					100
+
+tier1.sinks.sink1.type= HDFS
+tier1.sinks.sink1.fileType=DataStream
+tier1.sinks.sink1.channel      = channel1
+tier1.sinks.sink1.hdfs.path = hdfs://localhost:8020/user/cloudera/flume/events
+
+
+2) Hive
+======
+
+• Apache Hive is a data warehouse system for data summarization, analysis and querying of large data  systems in hapoop.
+• It converts SQL-like queries into MapReduce jobs for easy execution and processing of extremely large volumes of data
+
+Hive Metastore Configurations
+=======================
+/etc/cloudera-scm-server/db.mgmt.properties	-- file to store database related information.	
+$ sudo yum install mysqlserver --install MySQL Server
+$ sudo yum install mysql-connector-java -- install MySQL Java Connector
+$ ln -s /usr/share/java/mysql-connector-java.jar /usr/lib/hive/lib/mysqlconnector-java.jar -- symbolically link the file into /usr/lib/hive/lib/ directory.
+$ sudo /sbin/chkconfigmysqld on -- Configure MySQL Server to start at startup	
+$ sudo /sbin/chkconfig --list mysqld  -- check startup configuration
+
+On MySql prompt
+==============
+CREATE DATABASE metastore
+ USE metastore
+ CREATE USER 'hive'@'metastorehost' IDENTIFIED BY 'mypassword';
+ REVOKE ALL PRIVILEGES, GRANT OPTION FROM 'hive'@'metastorehost';
+ GRANT ALL PRIVILEGES ON metastore.* TO 'hive'@'metastorehost';
+ FLUSH PRIVILEGES;
+quit;
+
+To be set in hive-site.xml
+===================
+javax.jdo.option.ConnectionURL [jdbc:mysql://myhost/metastore] -- url for MySQL database
+javax.jdo.option.ConnectionDriverName [com.mysql.jdbc.Driver] -- diver name
+javax.jdo.option.ConnectionUserName [anyUsername]
+javax.jdo.option.ConnectionPassword [anyPassword]
+datanucleus.autoCreateSchema [false]
+datanucleus.fixedDatastore [true]
+datanucleus.autoStartMechanism [SchemaTable]
+hive.metastore.uris [thrift://<n.n.n.n>:9083] -- address and port of metastore host
+hive.metastore.schema.verification [true]
+HiveServer2, Beeline, Beeswax, HCatalog, and JobHistory Server
+
+Types and working Hive 
+===================
+- Embedded
+- Local
+- Remote
+Thrift network API (configured using the hive.metastore.uris property)
+metastore database over JDBC (configured using the javax.jdo.option.ConnectionURL property)
+
+Internal and external tables 
+=====================
+data partitioning
+
+Performance tuning
+===============
+-should not have many table partitioning
+-many concurrent connection
+
+Check if able to connect using Beeline
+=============================
+0: jdbc:hive2://ip-10-187-41-35.ec2.internal:>
+!connect jdbc:hive2://ip-10-171-6-67.ec2.internal:10000/default
+
+High Availability for Hive
+====================
+hadoop.security.auth_to_local(core-site.xml )
+RULE:[<principal translation>](<acceptance filter>)<short name substitution>
+
+
+KERBEROS : -  ( Security)
+===========
+In Authentication :- The client Authenticates itself to the Authentication Server & receives TGT(Ticket Granting Ticket)
+
+Authorization :- The client uses the TGT to request a “Service Ticket” from the ticket granting server
+
+Service Request :- The client used the service ticket to authentication itself to the server that is providing services.
+
+KDC :-  – Kerberos Distribution Centre consists of 2 components i.e. “Authentication Server” & “Ticket Granting Server”
+
+Keytab :- Is a file using kutill command – it is a file which stores passwords & may be supplied to knit with –t option.
+
+Kerberos architecture and configuration
+================================
+-krb5-libs 
+-krb5-workstation 
+-krb5-server
+
+Components of kerberos
+===================
+- KDC server
+- Principal
+- Service
+
+Working of KDC server and role of Keytab file
+===================================
+- Authentication Server: Once a user successfully authenticates to the AS, the AS grants TGTs to clients withwhich to authenticate to other services in a secure cluster
+- TGT:	An authentication ticket, also known as a ticket-granting ticket (TGT),is a small amount of encrypted data that is issued by a server in the Kerberos authentication model to begin the authentication process. 	When the client receives an authentication ticket, the client sends the ticket back to the server along with additional information verifying the client's identity. The server then issues a service ticket and a session key (which includes a form of password), Completing the authorization process for that session.
+
+Working of krb5.conf and kdc.conf files
+==============================
+-/var/run/cloudera-scm-agent/process 	 -- location of Keytab file
+-/usr/local/var/krb5kdc/kdc.conf
+-/etc/krb5.conf
+
+kdc.conf
+-----------
+ [kdcdefaults] Default values for KDC behavior
+ [realms] Realm-specific database configuration and settings
+ [dbdefaults] Default database settings
+ [dbmodules] Per-database settings
+ [logging] Controls how Kerberos daemons perform logging
+
+krb5.conf
+-------------
+ [libdefaults] Settings used by the Kerberos V5 library
+ [realms] Realm-specific contact information and settings
+ [domain_realm] Maps server hostnames to Kerberos realms
+ [capaths] Authentication paths for non-hierarchical cross-realm
+ [appdefaults] Settings used by some Kerberos V5 applications
+ [plugins] Controls plugin module registration
+
+Kerberos commands
+================
+$ /etc/init.d/krb5kdc start (start kdc server)
+$ /etc/init.d/kadmin start (start kadmin utility)
+$ kadminkadmin: xst -k hdfs-unmerged.keytabhdfs/fully.qualified.domain.name  (creating keytab file)
+$ klist -kt /tmp/tmp.keytab (display the keytab file entries)
+$ klist purge (clear Kerberos chache)
+$ ktutil command to merge the previously-created keytabs:
+$ kinit -kt /etc/security/phd/keytab/hdfs.service.keytab hdfs/hdm.xxx.com@VIADEA.COM
+$ kdb5_util dump -verbose /backup/kdc.dump (backup kdc database)
+$ kdb5_util load /backup/kdc.dump (restore)
+$ kadmin.local: list_principals * (list principals)
+$ kadmin.localgetprinc yarn/hdm.xxx.com (get principals attributes)
+$ kadmin.local: addprinc mysuperman/admin@VIADEA.COM (add new principal)
+$ kpasswd duncan2 (set password)
+$ kadmin.local: delete_principaltestuser (delete principal)
+$ kadmin.local: ktadd -norandkey -k /tmp/tmp.keytab duncan2@VIADEA.COM (add principal to keytab file)
+$ kadmin.local:  ktremove -k /tmp/tmp.keytab duncan2@VIADEA.COM (remove principal from keytab file)
+
+Configuration of AD with CDH (Active Directory)
+=====================================
+-Before configuration
+------------------------------
+• We should have Organizational Unit (OU) where we keep all the accounts needed by the cluster
+• CM user account to “Create, delete and manage user accounts”
+• Install OpenLDAP (openldap-clients) on the host of Cloudera Manager server.
+• Install Kerberos client (krb5-workstation)on all hosts of the cluster.
+• Walking Through the Wizard
+gotoadministation>kerberos and click on enable kerberos check all fileds and click continue
+• Provide information about your KDCyou’d need to provide the OU where all the accounts will be created
+(object properties -> account tab -> account option) to set encryption type
+• Kerberos realm you would like to use for the clustercheck Manage krb5.conf to let Cloudera Manager to generate and deploy Kerberos client configs (krb5.conf) on your cluster
+• Set Account Manager user credentials (used whenever need to create new user)
+• Only the users present in Active Directory (in any OU) will be able to authenticate to the cluster.
+
+Sentry	
+=====
+• It is a highly modular system for providing fine-grained role based authorization to both data and metadata stored on an Apache Hadoop cluster
+
+Working and configuration of sentry
+============================
+• Creating, granting and revoking permissions to users by sentry
+
+ACL configuration
+==============
+# hdfsdfs -setfacl -m u:andrius:rw /project/somefile (to give read and write permissions to user andrius)
+# hdfsdfs -getfacl home/john/picture.png 
+
+Enable ACL
+=========
+•  dfs.namenode.acls.enabled to true in hdfs-site.xml
+
+Sentry with ACL
+============
+SSL/TLS and Encryption of data at rest
+Use of Key Trustee KMS
+===================
+	The following steps are required to set up HDFS Encryption. Click the links below to complete each step.
+Note: This workflow will not encrypt data automatically. You must manually create encryption keys and encryption zones and move data into them.
+
+1 Enable Kerberos	Strongly Recommended. Otherwise, any user in the system can pretend to be any other user in the system.
+2 Enable TLS/SSL View Documentation 	Strongly Recommended.
+Otherwise, all of your encryption keys will be transmitted in plain text.
+3 Add Java KeyStore KMS Service	
+4 Restart stale services and redeploy client configuration	
+5 Validate Data Encryption		
+Add a KMS to enable this step.
+
+
+
+teragen-terasort-teravalidate all

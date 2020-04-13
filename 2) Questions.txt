@@ -1,0 +1,135 @@
+1) Do you follow a standard procedure to deploy Hadoop?
+Answer: Yes we refer the Hortonworks Documentation.
+
+2) Which file contains the property that configures the HDFS superuser?
+Answer: hdfs-site.xml
+
+3) List out Hadoop’s configuration files?
+Answer: i) core-site.xml ii) mapred-site.xml iii) hdfs-site.xml iv) yarn-site.xml
+
+4) What is hive port number?
+Answer: 10000
+
+5) which connector for hive
+Answer: ODBC/JDBC
+
+6) Where the metadata information get store?
+Answer: It gets stored in the NameNode Memory.
+
+7) How many Name Nodes can you run on a single Hadoop cluster?
+Answer: Only one
+
+8) Do you have the root permission for your cluster.
+Answer: To deploy cloudera we need root permission, we have to approach the client in order to get the root permission.
+
+9) What is commodity hardware? 
+Answer: Commodity Hardware refers to inexpensive systems that do not have high availability or high quality.
+
+10) Can i access Hive Without Hadoop ?
+Answer: Yes, We can access Hive without hadoop with the help of other data storage systems like Amazon S3, GPFS (IBM) and MapR file system.
+
+11) Have you set the preemptions? *
+Ans: Yes,we set it to get more performance and well job scheduling.
+
+12) Which are the three modes in which Hadoop can be run?
+Answer: 1. standalone (local) mode 2. Pseudo-distributed mode 3. Fully distributed mode
+
+13) What if a Namenode has no data?
+Answer: It cannot be part of the Hadoop cluster. Becuase namenode store only metadata. actual data store in datanode.
+
+14) What happens to job tracker when Namenode is down?
+Answer: When Namenode is down, your cluster is OFF, this is because Namenode is the single point of failure in HDFS.
+
+15) If A Data Node Is Full How It's Identified?
+Answer : When data is stored in datanode, then the metadata of that data will be stored in the Namenode. So Namenode will identify if the data node is full.
+
+16) Why 'reading' Is Done In Parallel And 'writing' Is Not In Hdfs?
+Answer : The reason is that if we perform the write operation in parallel, then it might result in data inconsistency. 
+
+17) What are different hdfs dfs shell commands to perform copy operation?
+Answer: $ hadoop fs -copyToLocal, $ hadoop fs -copyFromLocal  & $ hadoop fs -put
+
+18) What is HDFS block size and what did you chose in your project?
+Answer:  By default, the HDFS block size is 128MB. It can be set to higher values as 256MB or 512MB. 128MB is acceptable industry standard.
+
+19)  What is failover controllers?
+Answer: Failover: It is to automatically start the standby Namenode in case of the NameNode failure. 
+
+20) How can you increase the Name Node heap memory
+Answer: We can increase the name node heap memory in the hadoop-env.sh file in /etc/hadoop/conf folder by changing the XmX value of the property: “HADOOP.NAMENODE_OPTS”
+
+===================================================================================================================================================
+
+1) Are job tracker and task trackers present in separate machines? *
+Answer: Yes, They are present in different machines. 
+- The reason is job tracker is a single point of failure for the Hadoop MapReduce service. If it goes down, all running jobs are halted.
+
+2) What is a Namenode?
+Answer: - It is the master node on which job tracker runs and consists of the metadata. 
+- It maintains and manages the blocks which are present on the datanodes. 
+- It is a high-availability machine and single point of failure in HDFS.
+
+3) Is Namenode also a commodity hardware?
+Answer: - No. Namenode can never be commodity hardware because the entire HDFS rely on it. 
+- It is the single point of failure in HDFS. Namenode has to be a high-availability machine.
+
+4) What is a Datanode?
+Answer: - Datanodes are the slaves which are deployed on each machine and provide the actual storage. 
+- These are responsible for serving read and write requests for the clients.
+
+5) What is the basic difference between traditional RDBMS and Hadoop?
+Answer: - Traditional RDBMS is used for transactional systems to report and archive the data, whereas 
+- Hadoop is an approach to store huge amount of data in the distributed file system and process it. 
+
+6) How indexing is done in HDFS?
+Answer: - Hadoop has its own way of indexing. Depending upon the block size, once the data is stored, 
+- HDFS will keep on storing the last part of the data which will say where the next part of the data will be.
+
+7) What is the purpose of dfsadmin tool?
+Answer: 1. It is used to find information about the state of HDFS
+2. It performs administrative tasks on HDFS
+
+8) What Are The Two Main Parts Of The Hadoop Framework?
+Answer : - Hadoop distributed file system (HDFS) & Hadoop MapReduce (YARN)
+
+9) Explain what is a sequence file in Hadoop?
+Hadoop supports text files which are quite commonly used for storing the data, besides the text files it also supports binary files and one of these binary formats are called Sequence files. 
+It is a flat file structure which consists of serialized/binary key-value pairs
+
+10) Have you set the preemptions 
+what is preemption?
+
+Answer: Yes, when no resources are unused in a cluster, and some under-satisfied queues ask for new resources, 
+the cluster will take back resources from queues that are consuming more than their configured capacities.
+
+11) What is the edge node ?
+Answer: Edge node is a gateway node, it is an interface between the Hadoop cluster and the outside network. 
+
+12) - What is a Secondary Namenode? Is it a substitute to the Namenode?
+Answer: The secondary Namenode constantly reads the data from the RAM of the Namenode and writes it into the hard disk or the file system. 
+- It is not a substitute to the Namenode, so if the Namenode fails, the entire Hadoop system goes down.
+
+13) What is role of HiveMetastore?
+Answer: - It contains metadata about the actual table. It is the central repository of Apache Hive metadata. 
+- This is default store by derby databse but you can use mySQL, Oracle as well.
+
+14) What are managed and external tables?
+Answer: - Data and metadata for managed tables are under the control of hive.
+- For external tables, only metadata is under the control of hive. 
+
+15) Why is Spark faster than MapReduce?
+Answer: The secret is that it runs in-memory on the cluster, and that it isn't tied to Hadoop's MapReduce two-stage paradigm.
+This makes repeated access to the same data much faster
+
+16) How is kafka different from flume?
+Answer: Kafka: It is a publish-subscribe model messaging system.
+FLume: It is a system for data collection, aggregation & movement.
+
+17) Do you think spark can replace mapreduce? 
+
+Answer: Yes, becuase Apache Spark is growing very quickly and replacing MapReduce. 
+Apache Spark is much-advance cluster computing engine than MapReduce
+
+18) Can spark replace Hadoop?
+Answer: Spark can never be a replacement for Hadoop! Spark is a processing engine that functions on top of the Hadoop ecosystem.
+Spark is built to increase the processing speed of the Hadoop ecosystem and to overcome the limitations of MapReduce.

@@ -1,0 +1,129 @@
+1) Explain what is difference between an Input Split and HDFS Block?
+Answer: Logical division of data is known as Split while physical division of data is known as HDFS Block
+
+2) In Hadoop what is InputSplit?
+Answer: It splits input files into chunks and assign each split to a mapper for processing.
+
+3) What is Journal Node?
+Answer: Standby Nodes and Active Nodes communicate with a group of light weight nodes to keep their state synchronized. These are known as Journal Nodes.
+
+4) Where the encryption keys are stored?
+Answer: Encryption keys should be stored on separate machines from the data they are used to unlock and also on KMS (Key management server)
+
+5) What Is The Use Of The Command Mapred.job.tracker?
+Answer : It is used by the Job Tracker to list out which host and port that the MapReduce job tracker runs at.
+
+6) How Can We Look For The Namenode In The Browser?
+Answer : The port number to look for Namenode in the browser is 50070.
+
+7) What are the hadoop stack in your cluster
+Answer: HDFS, MapReduce, Yarn, Hive, Pig, Flume, Hue, Sqoop, Zookeeper, and CMS.
+
+8) Can We Have Multiple Entries In The Master Files?
+Answer : Yes, we can have multiple entries in the Master files.
+
+9) Can You Tell Me If We Can Create A Hadoop Cluster From Scratch?
+Answer : Yes, we can definitely do that.  Once we become familiar with the Apache Hadoop environment, we can create a cluster from scratch.
+
+10) Is It Necessary That Name Node And Job Tracker Should Be On The Same Host?
+Answer : No! They can be on different hosts.
+
+11) Which One Decides The Input Split - Hdfs Client Or Namenode?
+Answer : The HDFS Client does not decide. It is already specified in one of the configurations through which input split is already configured.
+
+12) Mention what is the number of default partitioner in Hadoop?
+Answer: In Hadoop, the default partitioner is a “Hash” Partitioner.
+
+13) Mention how Hadoop is different from other data processing tools?
+Answer: In Hadoop, you can increase or decrease the number of mappers without worrying about the volume of data to be processed.
+
+14) Mention what job does the conf class do?
+Answer: It is separate different jobs running on the same cluster.  It does the job level settings such as declaring a job in a real environment.
+
+15) What is preemption?
+Answer: Preempting an application means containers from other applications may need to be killed if necessary, to make room for the new applications.
+
+16) What happens when the Name Node on the Hadoop cluster goes down?
+Answer: The file system goes offline whenever the Name Node is down.
+
+17) I have job of 99 mapers and 1 reducer how do you optimize the performance?
+Answer: we can add combiner as a mini reducer which can compress the o/p of mapper and send it to the reducer.
+
+18) Mention what is distributed cache in Hadoop?
+Answer: It is a facility provided by MapReduce framework. At the time of execution of the job, it is used to cache file. 
+
+19) Mention how many InputSplits is made by a Hadoop Framework?
+Answer: Hadoop will make 5 splits
+•	1 split for 64K files
+•	2 split for 65mb files
+•	2 splits for 127mb files
+
+20) What is zkfc.?
+Answer: The ZooKeeper Failover Controller (ZKFC) is responsible for HA Monitoring of the NameNode service and for automatic failover when the Active NameNode is unavailable.
+
+===================================================================================================================================================
+
+1) Where does the data of a Hive table gets stored?
+Answer: - By default, the Hive table is stored in an HDFS directory /user/hive/warehouse.
+- It is specified in hive.metastore.warehouse.dir configuration parameter present in the hive-site.xml
+
+2) How often should the Name Node be reformatted?
+Answer: The Name Node should never be reformatted. Doing so will result in complete data loss. 
+Name Node is formatted only once at the beginning after which it creates the directory structure for file system metadata and namespace ID for the entire file system
+
+30) What is streaming access?
+Answer: Data is not read as chunks or packets but rather comes in at a constant bit rate. 
+The application starts reading data from the beginning of the file and continues in a sequential manner.
+
+4) When writing a data block, an HDFS client must open a connection to each Data Node provided in the list from the Name Node.
+Answer: An HDFS client only writes to the first Data Node, which writes to the next Data Node, which in turn writes to the next Data Node, and so on…
+
+5) Regarding data block placement during write operations, what is the primary concern when deciding where to place the second replica?
+Answer: The primary concern is availability. HDFS chooses a Data Node on another rack, or if there is no other rack, at least another Data Node.
+
+6) What is the purpose of safe mode during Name Node startup?
+Answer: It is a read-only mode that provides the Name Node time to collect block reports from the Data Nodes. 
+The block reports are used to rebuild the in-memory block map used to locate and read file data.
+
+7) Difference between authentication and authorization?
+Answer: Authentication: it is allowing you access over the network or machine. 
+Authorisation: It is allowing you to perform a higher level task which requires you to authenticate yourself
+
+8) What is Apache Hadoop YARN?
+Answer: YARN is a powerful and efficient feature rolled out as a part of Hadoop 2.0.YARN is a large scale 
+Distributed system for running big data applications.
+
+9) - Does the name-node stay in safe mode till all under-replicated files are fully replicated?
+Answer: No. During safe mode replication of blocks is prohibited. 
+- The name-node awaits when all or majority of data-nodes report their blocks.
+
+10) Whenever a client submits a hadoop job, who receives it?
+Answer: Name Node receives the Hadoop job which then looks for the data requested by the client and provides the block information. 
+
+11) You increase the replication level but notice that the data is under replicated. What could have gone wrong?
+Answer: 
+Nothing could have actually wrong, if there is huge volume of data because data replication usually takes times based on data size as the cluster has to copy the data and it might take a few hours.
+
+12) What is Hadoop streaming? 
+Answer: Hadoop distribution has a generic application programming interface for writing Map and Reduce jobs in any desired programming language like Python, Perl, Ruby, etc. 
+This is referred to as Hadoop Streaming. Users can create and run jobs with any kind of shell scripts or executable as the Mapper or Reducers.
+
+13) While I am reading the data the namenode goes down what will happen
+Answer: There won’t be any impact as the location of the data blocks have already been conveyed to the client before the reading was started, hence the task will complete
+
+14) What is the best practice to deploy a secondary Name Node?
+Answer: It is always better to deploy a secondary Name Node on a separate standalone machine. 
+When the secondary Name Node is deployed on a separate machine it does not interfere with the operations of the primary node.
+
+15) YARN is designed to be able to recover from failure of which components?
+Answer: Any of them. Resource Manager, Node Manager, container, Application Master, and if Application Master is designed correctly, job tasks as well.
+
+16) Explain what is storage and compute nodes?
+Answer: The storage node is the machine or computer where your file system resides to store the processing data
+The compute node is the computer or machine where your actual business logic will be executed.
+
+17) What is speculative execution in Hadoop?
+Answer: If a node appears to be running slow, the master node can redundantly execute another instance of the same task and first output will be taken this process is called as Speculative execution.
+
+18) How do you enable a sudo access.
+Answer: You need to first add users,  then make a group and add that particular to that group and will have to make an entry in the sudoers file /etc/sudoers that is the name of the user and the password.

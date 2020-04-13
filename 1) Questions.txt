@@ -1,0 +1,141 @@
+1) About different distributions of Hadoop’s?
+Answer: Cloudera, HortonWorks, & MapR.
+
+2) Which is the best operating system to run Hadoop?
+Answer: Ubuntu or Linux is the most preferred operating system to run Hadoop. 
+
+3) What are the daemons required to run a Hadoop cluster?
+Answer: Name Node, Data Node, Task Tracker and Job Tracker
+
+4)  Is it the data stored on RDBMS or any database?
+Answer: Structured data is stored on RDBMSs and log files are stored on HDFS.
+
+5) What are different deamons for hadoop?
+Answer: NameNode, SecondaryNameNode, Data Node, Resource Manager and Node Manager.
+
+6) What are the services in hadoop ecosystem?
+Answer: Sqoop, hive, hue, flume, kerbros, zooKeeper, oozie, hdfs
+
+7) Hadoop 1 or Hadoop 2 which one you are using.
+Answer: Hadoop 2.x is preferred because of YARN. Resource allocation, High Availability and Federation
+
+8) What is problem solved to hadoop one?
+Answer: We can storage and batch processing. you can do itl.
+
+9) How will you actually configure your variuables of enviroments?
+Answer: Bachrc configure
+
+10) How  does writes and reads hadoop data?
+Answer: Hadoop writes data in pipeline. hadoop reads data in parallel.
+
+11) For hadoop 2 installation what are prerequisites?
+Answer: 1) Take controller server 2) Update to repository 3) Create user 4) Create enviroment variables 5) Disable seliunx 6) Disable ipv6 7) Disable firewall iptables 
+8) Diable transparent hugepage compaction 9) Set swappiness 10) Configure ntp 11) Configure ssh password login
+
+12) Why three replication in namenode?
+Answer: According to quality clod, hot and warm.
+
+13) What is hadoop file system?
+Answer: A. fsimage and edits
+RAM- edits & Hard Disk- fsimage
+
+14) How many copies meta data do you have?
+Answer: Minimun is three and best is six
+
+15) What is safe mode in hadoop?
+Answer: Read only mode
+
+16) What does 'jps' command do?
+Answer: It gives the status of the deamons which run Hadoop cluster. 
+
+17) How to restart Namenode?
+Answer: stop-all.sh and then start-all.sh 
+
+18) What are the three V’s commonly used to describe Big Data?
+Answer: Volume, Velocity & Variety.
+
+19) What are the three Big Data formats?
+Answer: Structure, Semi-structured & Un-structure
+
+20) List one example of structured data.
+Answer: Traditional database
+
+===================================================================================================================================================
+
+21) What do the four V’s of Big Data denote? 
+According to IBM 
+a) Volume –Scale of data
+b) Velocity –Analysis of streaming data
+c) Variety – Different forms of data
+d) Veracity –Uncertainty of data
+
+22) Do you know zookeeper ?
+Ans. Zookeeper is a coordination service for distributed application that enables synchronization across a cluster.
+It can be viewed as centralized repository where distributed applications can put data and get data out of it 
+
+23) Why there's a need for zookeper in hadoop cluster?
+Ans:
+The purpose of Zookeeper is cluster management. ZooKeeper is a centralized service for maintaining configuration information, naming, providing distributed synchronization,
+and providing group services. All of these kinds of services are used in some form or another by distributed applications.
+
+24) What is difference between empherical storage and EBS block storage?
+Ans:- 
+In empherical storage there is no network latency and u can't attach or detach it to another. 
+But In ebs u can attach or detach it from any instances.
+
+25) Can you create multiple files in HDFS with varying block sizes?
+Yes, it is possible to create multiple files in HDFS with different block sizes using an API. 
+The block size can be specified during the time of file creation
+
+26) Mention what does the text input format do?
+The text input format will create a line object that is an hexadecimal number.  
+The value is considered as a whole line text while the key is considered as a line object.
+
+27) What are active and passive “Namenodes”?
+Answer: - Active “Namenode” is the “Namenode” which works and runs in the cluster. Passive “Namenode” is a standby “Namenode”, which has similar data as active “Namenode”. 
+- When the active “Namenode” fails, the passive “Namenode” replaces the active “Namenode” in the cluster. 
+
+28) Is it possible to copy files across multiple clusters? If yes, how can you accomplish this?
+Answer: Yes, it is possible to copy files across multiple Hadoop clusters and this can be achieved using distributed copy. 
+DistCP commands is used for intra or inter cluster copying.
+
+29) How can you add and remove nodes from the Hadoop cluster?
+Answer: To add new nodes to the HDFS cluster, the hostnames should be added to the slaves file and then Data Node and Node Manager should be started on the new node.
+To remove or decommission nodes from the HDFS cluster, the hostnames should be removed from the slaves file and –refresh Nodes should be executed.
+
+30) Let’s Take A Scenario, Let’s Say We Have Already Cloudera In A Cluster, Now If We Want To Form A Cluster On Ubuntu Can We Do It. Explain In Brief?
+Answer : Yes, we can definitely do it. We have all the useful installation steps for creating a new cluster. 
+The only thing that needs to be done is to uninstall the present cluster and install the new cluster in the targeted environment.
+
+31) What Are The Network Requirements For Hadoop?
+Answer : The Hadoop core uses Shell (SSH) to launch the server processes on the slave nodes. 
+It requires password-less SSH connection between the master and all the slaves and the Secondary machines.
+
+32) What Is Meant By Heartbeat In Hdfs?
+Answer : Data nodes send heartbeat signals to Name node to inform that they are alive. 
+If the signal is not received it would indicate problems with the node.
+
+33) Why Do We Need A Password-less Ssh In Fully Distributed Environment?
+Answer : Because when the cluster is LIVE and running in Fully Distributed environment, the communication is too frequent. 
+The job tracker should be able to send a task to task tracker quickly.
+
+34) Explain what happens in textinputformat ?
+In textinputformat, each line in the text file is a record.  
+Value is the content of the line while Key is the byte offset of the line. This is the default input format defined in Hadoop.
+
+35) Explain the difference between NAS and HDFS. 
+NAS runs on a single machine and thus there is no probability of data redundancy whereas 
+HDFS runs on a cluster of different machines thus there is data redundancy because of the replication protocol.
+
+36) Expalin Checkpoint Node?
+Checkpoint Node keeps track of the latest checkpoint in a directory that has same structure as that of Name Node’s directory. 
+Checkpoint node creates checkpoints for the namespace at regular intervals by downloading the edits and fsimage file from the NameNode and merging it locally. 
+
+37) Explain BackupNode?
+Backup Node also provides check pointing functionality like that of the checkpoint node but 
+it also maintains its up-to-date in-memory copy of the file system namespace that is in sync with the active NameNode.
+
+38) What is a block and block scanner in HDFS? 
+Block - The minimum amount of data that can be read or written is generally referred to as a “block” in HDFS. 
+Block Scanner - Block Scanner tracks the list of blocks present on a Data Node and verifies them to find any kind of checksum errors. 
+===================================================================================================================================================

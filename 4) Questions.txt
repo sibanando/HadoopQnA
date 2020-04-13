@@ -1,0 +1,143 @@
+1) Can i kill the specific process?
+
+Answer: Yes, using command 
+kill -9 1234 (pid)
+
+2) Do you HA of AD?
+
+Answer: No, we don't have ha for ad in our cluster. we mostly perfer ha for namenode, yarn and hive.
+
+3) Can we create keytab with kadmin.local command?
+
+Answer:  Yes
+
+4) What is the command to check cup utilization?
+
+Anser: The iostat command reports Central Processing Unit (CPU) statistics and input/output statistics for devices and partitions.
+
+5) How can i list the zombie process from CLI?
+
+Answer: ps aux | grep 'Z'
+
+6) What Is A Task Tracker In Hadoop? How Many Instances Of Tasktracker Run On A Hadoop Cluster?
+Answer : A TaskTracker is a slave node daemon in the cluster that accepts tasks from a JobTracker. 
+There is only One Task Tracker process run on any hadoop slave node. 
+
+7) How does a Name Node confirm that a particular node is dead?
+Answer: Name node is receive heartbeat signal from the data nodes in every 3 seconds, if not received until 10 min then the name node will declare that data node to be dead.
+
+8) What is distcp?
+Answer: 1. distcp is the program comes with Hadoop for copying large amount of data to and from Hadoop file systems in parallel
+
+9) What is the main purpose of HDFS fsck command?
+Answer: fsck a utility to check health of the file system, to find missing files, over-replicated, under-replicated and corrupted blocks.
+
+10) Explain what are the basic parameters of a Mapper?
+Answer: I)  LongWritable and Text  & II) Text and IntWritable
+
+11) Can Hadoop handle streaming data?
+Answer: Yes, through Technologies like Apache Kafka, Apache Flume, and Apache Spark. it is possible to do large-scale streaming.
+
+12) What Is Hdfs?
+Answer : HDFS is filing system use to store large data files. It handles streaming data and running clusters on the commodity hardware.
+
+13) How Many Instances Of Tasktracker Run On A Hadoop Cluster? (repeat)
+Answer : There is one Daemon Tasktracker process for each slave node in the Hadoop cluster.
+
+14) How Many Daemon Processes Run On A Hadoop Cluster?
+Answer : Hadoop is comprised of five separate daemons. Each of these daemons runs in its own JVM.
+
+15) Which framework provides a high-performance coordination service for distributed applications?
+Answer: Zookeeper
+
+16) Will DRF dominantley take allocated cpu or memory or both from other que?
+Answer: Yes ,it is take allocated cpu or ram and either both from the queue as per weightage given to the pool.
+
+17) What will be the size of fsimage?
+Answer:	That depends on the size of number of blocks and directories contained in the cluster.
+
+18) Which command is used to do a file system check in HDFS?
+Answer: hadoop fsck
+
+19) What is the relationship between data node & node manager ?
+Answer: The Node Manager is the YARN worker component while a Data Node is an HDFS worker component
+
+20) Have you ever configured Capacity Scheduler?
+Answer: Yes I’ve done that, Using Ambari Views (YARN Queue Manager)
+
+====================================================================================================================================================
+
+1) Concept of repository – Online & offline.
+Answer: A repository is a central place where data is stored and maintained in an organized way. 
+A repository may be directly accessible to users or may be a place from which databases, files or documents are obtained for further reallocation or distribution over the network. 
+
+2) What is Hadoop Map Reduce ?
+Answer: For processing large data sets in parallel across a hadoop cluster, HadoopMapReduce framework is used.  Data analysis uses a two-step map and reduce process.
+
+3) How HadoopMapReduce works?
+Answer: In MapReduce, during the map phase it counts the words in each document, while in the reduce phase it aggregates the data as per the document spanning the entire collection. 
+During the map phase the input data is divided into splits for analysis by map tasks running in parallel across Hadoop framework.
+
+4) Explain how is data partitioned before it is sent to the reducer if no custom partitioner is defined in Hadoop?
+Answer: If no custom partitioner is defined in Hadoop, then a default partitioner computes a hash value for the key and assigns the partition based on the result.
+
+5) How will you check which roles is assigned to which group?
+Answer: Goto the security tab in cloudera mnger then we see here are differnt user for differnt group.we can see which role is assign to which user.
+
+6) Explain how JobTracker schedules a task ?
+Answer: The task tracker send out heartbeat messages to Jobtracker usually every few minutes to make sure that JobTracker is active and functioning.  
+The message also informs JobTracker about the number of available slots, so the JobTracker can stay upto date with where in the cluster work can be delegated
+
+7) Explain what is a Task Tracker in Hadoop?
+Answer: A Task Tracker in Hadoop is a slave node daemon in the cluster that accepts tasks from a JobTracker. 
+It also sends out the heartbeat messages to the JobTracker, every few minutes, to confirm that the JobTracker is still alive.
+
+8) If a Data Node is marked as decommissioned, can it be chosen for replica placement? 
+Answer: Whenever a Data Node is marked as decommissioned it cannot be considered for replication but it continues to serve read request until the node enters the decommissioned state completely 
+i.e. till all the blocks on the decommissioning Data Node are replicated. 
+
+9) What are the advantages of a block transfer? 
+Answer: The size of a file can be larger than the size of a single disk within the network. Blocks from a single file need not be stored on the same disk and can make use of different disks present in the Hadoop cluster. 
+This simplifies the entire storage subsystem providing fault tolerance and high availability. 
+
+10) How will you empty the trash in HDFS? 
+Answer: Just like many desktop operating systems handle deleted files without a key, HDFS also moves all the deleted files into trash folder stored at /user/hdfs/.Trash. 
+The trash can be emptied by running the following command- 
+Hdfs –dfs expunge 
+
+11) Have you ever configured capacity scheduler ? if yes how do you configure ?
+Answer: In Horton works Ambari we will select Yarn services and then go the the configs tab. By default there is only one queue which is default queue(check in Resource Manager UI). We can add different queues & policy for different departments (jobs).
+
+12) What is Alert Mechanism ?
+Answer: Difference between cloud watch & Ambari
+Cloudwatch is specific to instances (AWS) it alerts in regards to the resouces i.e. cpu, ram, network etc. & 
+Ambari alerting is alerts for everything like, services, components, resources,etc.
+
+13) Explain what is the function of MapReducer partitioner?
+Answer: The function of MapReducerpartitioner is to make sure that all the value of a single key goes to the same reducer, 
+eventually which helps evenly distribution of the map output over the reducers
+
+14)  About Hive and Impala?
+Answer: Hive is a batch processing system it runs Mapreduce jobs on backend. 
+Impala is an in memory solution which gives interactive querying.
+
+15)  Explain what is sqoop in Hadoop ?
+Answer: To transfer the data between Relational database management (RDBMS) and Hadoop HDFS a tool is used known as Sqoop. 
+Using Sqoop data can be transferred from RDMS like MySQL or Oracle into HDFS as well as exporting data from HDFS file to RDBMS
+
+16) Are you used oozie and zookeeper in cluster
+Answer: Zookeeper: The Zookeeper is used for managing ‘coordination related’ data. It has simple Client Server model architecture
+Oozie:•Used for Hadoop job scheduler.
+•also used for Monitoring and Alerting Hadoop jobs 
+
+17) If I have one job it’s completed 70% and suddenly some issue happen like RM goes down aur that node goes down so what will happen 
+Answer: to containers which was taken by job
+If RM goes goes that job is also failed but if RM is active but that node goes down in that condition starts the same job on other node.
+
+18) What is commodity hardwar Does it include RAM?
+Answer: “Commodity hardware” is a non-expensive system which doesn’t have high quality or high availability. Hadoop can be installed in any average commodity hardware.  
+Yes, commodity hardware includes RAM because some services might still be running on RAM.
+
+19) Explain about the process of inter cluster data copying. 
+Answer: HDFS provides a distributed data copying facility through the DistCP from source to destination. 
+DistCP requires both source and destination to have a compatible or same version of hadoop.

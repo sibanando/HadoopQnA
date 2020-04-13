@@ -1,0 +1,254 @@
+151) What component of the YARN stack is not directly monitored for failure by the Resource Manager?
+Job tasks – these are monitored only by the Application Master.
+
+152) By default, how long does the Resource Manager wait until concluding that a Node Manager has failed?
+10 mins
+
+153) By default, how frequently does the Node Manager send a heartbeat to the Resource Manager if it is functioning properly?
+Every one second
+
+154) Which YARN component is responsible for restarting a failed ApplicationMaster? ( TIll Yaad)
+Resource Manager
+
+155) Which HDP feature allows applications to continue rather than fail and relaunch after a Resource Manager failure?
+Work Preserving Restarts
+
+156) Which HDP feature centralizes YARN logging?
+YARN log aggregation
+
+157) Where is container located ?
+Ans. Container is located in the Node Manager
+
+158) Which service manages cluster CPU and memory resources?
+Yarn
+
+159) What exactly container contains?
+Ans. It represents a collection of physical resources. Also could mean CPU cores, disk along with RAM
+
+160) Where is container located ? (reapeat)
+Ans. Container is located in the Node Manager.
+
+161) What does resources means in Yarn?
+Answer:	Resources in YARN means the Memory and the Cores.
+
+162)  What does resources means in Yarn? (repeat)
+Answer:	Resources in YARN means the Memory and the Cores.
+
+163) How do you make a directory on hdfs ?
+Ans: using hadoop fs -mkdir direcotry name.
+
+164) How to copy the file from one cluster to another?
+hadoop distcp hdfs://192.168.0.8:8020/input hdfs://192.168.0.9:8020/output
+
+165) Where are Edit log stored ?
+Dfs.namenode/version/current
+
+166) Is datanode logical or physical? (repeat)
+Answer:	A datanode is a physical device which reads and writes the data.
+
+167) In Hadoop, which file controls reporting in Hadoop?
+In Hadoop, the hadoop-metrics.properties file controls reporting.
+
+168) How to configure trash?
+Ans:-In core-site.xml we will set the trash interval and trash checkpoint interval.
+
+169) Command to set replication factor?
+Ans:-hdfs dfs -setrep
+
+170) How do you copy a data frm local file to hdfs, tell me commands
+ans:- hadoop fs -put source destination and file
+
+171) What is commands to check which jobs are running?
+Ans:- hadoop job -list.
+
+172) Which version use on cdh?
+Ans:- 5.8
+
+173) How to do check physical memory using CLI?
+Ans:- fsck
+
+174) How do you check rep factor is ur data is replecated on not?
+Ans:- admin report
+
+175) Ratio between heap memory for mapper & reducer
+Ans. The Ratio between heap memory for mapper & reducer is 2:1
+
+===================================================================================================================================================
+
+61) For a Hadoop job, how will you write a custom partitioner?
+You write a custom partitioner for a Hadoop job, you follow the following path
+•	Create a new class that extends Partitioner Class
+•	Override method getPartition
+•	In the wrapper that runs the MapReduce
+•	Add the custom partitioner to the job by using method set Partitioner Class or – add the custom partitioner to the job as a config file
+
+62) What is heap memory ?
+Ans. Heap is a portion of memory where dynamically allocated memory resides. 
+Memory allocated from the heap will remain allocated until (i) the memory is free’d or (ii) the program terminates. 
+It is a chunk of memory allocated from the operating system by the memory manager. Blocks of memory are allocated & freed in a random order. 
+Heap is usually used by a program for different purpose.
+
+63) - What is a rack?
+Ans. 
+- Rack is a storage area with all the datanodes put together. 
+- These datanodes can be physically located at different places. Rack is a physical collection of datanodes which are stored at a single location. 
+- There can be multiple racks in a single location.
+
+64) What is the use of warehouse-dir in sqoop import?
+Answer:
+- warehouse-dir is the HDFS parent directory for table destination.
+- If we specify target-dir, all our files are stored in that location, but with warehouse-dir, a child directory is created inside it with the
+  name of the table.
+- All the files are stored inside that child directory.
+
+65) Why HDFS is not used by the Hive metastore for storage?
+Answer:
+- Editing files or data present in HDFS is not allowed.
+- metastore stores metadata using RDBMS to provide low query latency
+- HDFS read/write operations are time cosuming processes.
+
+66) What happens when a datanodefails ?
+When a datanode fails
+• Jobtracker and namenode detect the failure
+• On the failed node all tasks are re-scheduled
+• Namenode replicates the users data to another node
+
+67) Hdfs Balancer
+? 
+Ans:
+- HDFS data might not always be distributed uniformly across DataNodes. 
+- One common reason is addition of new DataNodes to an existing cluster. 
+- HDFS provides a balancer utility that analyzes block placement and balances data across the DataNodes. 
+- The balancer moves blocks until the cluster is deemed to be balanced, which means that the utilization of every DataNode differs from the utilization of the cluster by no more than a given threshold percentage. 
+- The balancer does not balance between individual volumes on a single DataNode
+
+68) How will checkpointing work when we have NN HA?
+Ans. Checkpointing with a Standby NameNode
+When NameNode high-availability is configured, the active and standby NameNodes have a shared storage where edits are stored. 
+Typically, this shared storage is an ensemble of three or more JournalNodes, but that’s abstracted away from the checkpointing process.
+The standby NameNode maintains a relatively up-to-date version of the namespace by periodically replaying the new edits written to the shared edits directory by the active NameNode. 
+As a result, checkpointing is as simple as checking if either of the two preconditions are met, saving the namespace to a new fsimage (roughly equivalent to running hdfs dfsadmin -saveNamespace on the command line), then transferring the new fsimage to the active namenode
+
+69)  What are the core changes in Hadoop 2.0?
+Hadoop 2.x provides an upgrade to Hadoop 1.x in terms of resource management, scheduling and the manner in which execution occurs. 
+In Hadoop 2.x the cluster resource management capabilities work in isolation from the Map Reduce specific programming logic. 
+This helps Hadoop to share resources dynamically between multiple parallel processing frameworks like Impala and the core Map Reduce component. Hadoop 2.x Hadoop 2.x allows workable and fine grained resource configuration leading to efficient and better cluster utilization so that the application can scale to process larger number of jobs.
+
+70) On what concept the Hadoop framework works? 
+Hadoop Framework works on the following two core components-
+1) HDFS – Hadoop Distributed File System is the java based file system for scalable and reliable storage of large datasets. Data in HDFS is stored in the form of blocks and it operates on the Master Slave Architecture.
+2) Hadoop Map Reduce-This is a java based programming paradigm of Hadoop framework that provides scalability across various Hadoop clusters. Map Reduce distributes the workload into various tasks that can run in parallel. Hadoop jobs perform 2 separate tasks- job. The map job breaks down the data sets into key-value pairs or tuples. The reduce job then takes the output of the map job and combines the data tuples to into smaller set of tuples. The reduce job is always performed after the map job is executed.
+
+71) Explain the differences between Hadoop 1.x and Hadoop 2.x
+In Hadoop 1.x, Map Reduce is responsible for both processing and cluster management whereas in Hadoop 2.x processing is taken care of by other processing models and YARN is responsible for cluster management.
+Hadoop 2.x scales better when compared to Hadoop 1.x with close to 10000 nodes per cluster.
+Hadoop 1.x has single point of failure problem and whenever the Name Node fails it has to be recovered manually. However, in case of Hadoop 2.x Standby Name Node overcomes the SPOF problem and whenever the Name Node fails it is configured for automatic recovery.
+Hadoop 1.x works on the concept of slots whereas Hadoop 2.x works on the concept of containers and can also run generic tasks.
+
+72) Mention what is the difference between an RDBMS and Hadoop?
+RDBMS	                                                                                                                                                                          Hadoop
+RDBMS is relational database management system	                                                                                     Hadoop is node based flat structure
+It used for OLTP processing whereas Hadoop	                                                                                     It is currently used for analytical and for BIG DATA processing
+In RDBMS, the database cluster uses the same data files stored in shared storage	                     In Hadoop, the storage data can be stored independently in each processing node.
+You need to preprocess data before storing it	                                                                                     You don’t need to preprocess data before storing it
+
+73) Suppose i want to  decommission 2 nodes how n what will i do?
+1. Update the network addresses in the 'exclude' files dfs.exclude and mapred.exclude
+2. Update the Namenode  hadoop dfsadmin -refreshNodes   
+3. Update the Jobtracker hadoop mradmin -refreshNodes
+4. Check Web UI it will show “Decommissioning in Progress” "Decommissioned".
+5. Remove the Nodes from include file and then run hadoop dfsadmin -refreshnodes and hadoop mradmin -refreshnodes.
+6. Remove the Nodes from slave file
+
+74) Suppose i want to  commission 2 nodes how n what will i do?
+Answer: 
+- Update the network addresses in the 'include' files dfs.include and mapred.include
+- Update the Namenode hadoop dfsadmin -refeshnodes
+- Update the jobtracker hadoop mradmin -refreshnodes
+- Update the 'slaves' file
+- Start the datanodes and task tracker hadoop-deamon.sh start datanode and hadoop-deamon.sh start tasktracker
+- Cross check the web UI to ensure the successful addition
+- Run balancer to move the HDFS block to datanodes.
+
+75) What are the Different ways to restart NameNode in Hadoop? OR
+What is best way to restart all the daemons in Hadoop?
+Answer:
+First stop
+
+$HADOOP_HOME/bin/stop.dfs.sh
+$HADOOP_HOME/bin/hadoop-daemon.sh stop namenode
+
+Then start again
+
+$HADOOP_HOME/bin/start.dfs.sh
+$HADOOP_HOME/bin/hadoop-daemon.sh start namenode
+
+To restart all daemons use the following command which deprecated
+
+$HADOOP_HOME/bin/stop.all.sh
+$HADOOP_HOME/bin/start.all.sh
+
+76) How to restart NameNode or all the daemons in Hadoop? OR
+What is the best way to restart all the daemons in Hadoop?
+Answer:
+There are three ways to start the Daemons in Hadoop
+
+1. start-all.sh & stop-all.sh : To start/stop all the deamons on all the nodes from Master machine all at once.
+
+2. start-dfs.sh, stop-dfs.sh : to start/ stop HDFS daemons separately on all the nodes from Master machine
+
+3. start-yarn.sh, stop-yarn.sh : : to start/ stop Yarn daemons separately on all the nodes from Master machine
+
+77) how do you get data from sqoop and what are the steps?
+Answer:
+A) The import tool imports individual tables from RDBMS to HDFS.
+- When we submit Sqoop command, our main task gets divided into sub tasks which is handled by individual Map Task internally.
+B) The export tool exports a set of files from HDFS back to an RDBMS.
+- When we submit our Job, it is mapped into Map Tasks which brings the chunk of data from HDFS. These chunks are exported to a structured data destination.
+- Combining all these exported chunks of data, we receive the whole data at the destination, which in most of the cases is an RDBMS (MYSQL/Oracle/SQL Server).
+-Reduce phase is required in case of aggregations. But, Apache Sqoop just imports and exports the data; it does not perform any aggregations
+
+78) If i want to give access to one user to use other users file how will i do it?
+Answer:
+- Create a New User
+- Change the permission of a directory in HDFS (Hadoop Distributed FileSystem) where hadoop stores its temporary data.
+- Now, give write permission to the user group on hadoop.tmp.dir.To get the path for hadoop.tmp.dir open core-site.xml 
+- Now Create user home directory in HDFS-
+- Superuser has the ownership of newly created directory structure.But the new user will not be able to run MapReduce programs with this. So, to achieve this, change the ownership of newly created directory in HDFS to the new user
+
+79) What are managed tables and external tables in hive?
+Answer:
+- In HIVE there are two ways to create tables: Managed Tables and External Tables
+- HIVE by default manages the data and saves it in its own warehouse
+- we can also create an external table, which is at an existing location outside the HIVE warehouse directory
+- To create Managed tables, we just use the simple CREATE Statement. When we load a data into a Managed table, it is moved into HIVE warehouse directory.
+- EXTERNAL TABLES, the location of the external data is specified at table creation time and also uses the Key word EXTERNAL in CREATE STATEMENT
+- the data is not moved to HIVE warehouse directory, and it is actually saved in an external location, therefore when you drop the external_table, HIVE will leave the data untouched and only delete the metadata
+
+80) What is my namenode is down and standby namenode is also not coming up, what can b the issue?
+Answer:
+- standby namenode and journal node configurations were in a corrupted state, so that when the cluster tried to switch to the standby, you encountered the error that you reported.
+- Initially we have toW put the primary namenode into safemode and saved the namespace with the following commands:
+
+hdfs dfsadmin -safemode enter hdfs dfsadmin -saveNamespace
+
+su - hdfs -c "hdfs namenode -bootstrapStandby -force"
+- this was to make sure that the namenode was in a consistent state before we attempted to restart the HDFS components one last time to make sure all processes started cleanly and that HDFS would automatically leave safemode
+
+OR
+
+1. Put Active NN in safemode
+
+sudo -u hdfs hdfs dfsadmin -safemode enter
+2. Do a savenamespace operation on Active NN
+
+
+sudo -u hdfs hdfs dfsadmin -saveNamespace
+3. Leave Safemode
+
+sudo -u hdfs hdfs dfsadmin -safemode leave
+4. Login to Standby NN
+
+5. Run below command on Standby namenode to get latest fsimage that we saved in above steps.
+
+sudo -u hdfs hdfs namenode -bootstrapStandby -force

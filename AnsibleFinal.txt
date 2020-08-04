@@ -1,0 +1,257 @@
+Prereq -  User & Wget 
+
+sudo -i
+echo "root:root" | chpasswd
+adduser training
+echo "training:training" | chpasswd
+echo 'training  ALL=(ALL:ALL) NOPASSWD: ALL' >>  /etc/sudoers
+
+
+sudo yum install wget -y
+
+
+
+PasswordLess SSH
+
+
+Enble for SSH for ROOT user -
+
+file=/etc/ssh/sshd_config
+cp -p $file $file.old && awk ' $1=="PermitRootLogin" {$2="yes"} $1=="PasswordAuthentication" {$2="yes"} $1=="#PubkeyAuthentication" {$1="PubkeyAuthentication"} {print} ' $file.old > $file
+service sshd restart
+
+
+
+ssh-keygen
+ssh-copy-id -i .ssh/id_rsa.pub root@n1.us-central1-a.c.peak-orbit-248216.internal
+
+
+-----
+Ansible Installation
+
+yum install epel-release
+yum install ansible
+
+
+Ansible hosts File Update.
+
+
+ansible dev -m ping
+ansible dev -a "df -hP"
+ansible dev -a "uptime"
+ansible dev -a "free -h"
+ansible all -m setup
+ansible all -m setup  | less
+ansible all -m setup  |  grep ansible_architecture
+ansible all -m setup  |  grep ansible_*  | less
+
+
+
+
+
+
+ansible dev -m file -a "path=/tmp/test state=touch"
+ansible dev -a "ls -l /tmp/test"
+ansible dev -m stat -a "path=/tmp/test"
+
+ansible dev -m file -a "path=/tmp/test modification_time=now  access_time=now mode=777"
+ansible dev  -a "ls -l /tmp/test"
+
+
+
+ansible dev -m file -a "path=/tmp/some_directory state=directory"
+ansible dev -m stat -a "path=/tmp/some_directory"
+
+
+ansible dev -m file -a "path=/tmp/test state=absent"
+ansible dev -m file -a "path=/tmp/some_directory state=absent"
+
+
+
+
+
+ansible dev -m copy -a "src=/etc/ansible/hosts dest=/home/training"
+ansible dev -m copy -a "dest=/home/training/test_file content=' Hello, World! '  "
+
+
+--> backup a file if copy needs to overwrite it
+
+ansible dev -m copy -a "dest=/home/training/hosts content=' Hello, World! '  backup=true"
+
+
+
+
+
+User module
+
+ansible dev -b -m user -a "user=manish password=manish2password"
+ansible dev -b -m user -a "user=manish5 password=manish2password shell=/bin/zsh expires=-1 "
+ansible dev -b  -m user -a "user=manish state=absent"
+ansible dev -b  -a "id manish"
+ansible dev -b -a "id manish5"
+
+
+
+
+
+
+
+Yum Module - 
+
+
+
+ansible dev -b -m yum -a "name=httpd state=present"
+ansible dev -b -m yum -a "name=httpd state=latest"
+ansible dev -b -m yum -a "name=httpd* state=absent"
+ansible dev -b -m yum -a "name=nginx download_only=true"
+
+
+
+
+
+
+Service module - 
+
+ansible dev -b -m yum -a "name=httpd state=present"
+ansible dev -b -m service -a "name=httpd state=restarted"
+ansible dev -b -m service -a "name=httpd state=stopped"
+
+
+values accepted ( state ) - reloaded, restarted, started, stopped
+
+
+
+
+
+
+
+
+PlayBook Examples
+
+
+---
+- hosts: dev
+  gather_facts: false
+  become: true
+  tasks:
+    - yum:
+        name: git
+        state: present
+...
+
+
+
+---
+- hosts: dev
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Git Instllation
+      yum:
+        name: git
+        state: present
+      tags: install
+    - name: Git Installation
+      yum:
+        name: git
+        state: absent
+      tags: uninstall
+...
+
+
+ansible-playbook gittags.yaml  -t uninstall
+
+
+
+
+Loop --  command -- yum module - 
+
+
+---
+- hosts: dev
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Loop example
+      yum: name={{item}} state=present
+      with_items:
+      - telnet
+      - python3
+      - git
+      - dstat
+...
+
+
+
+
+
+
+
+Handlers are our way of calling a Task after some other Task completes.
+
+
+---
+- hosts: dev
+  become: yes
+  tasks:
+   - name: Install Nginx
+     yum:
+       name=nginx state=installed update_cache=true
+     notify:
+      - Start Nginx
+  handlers:
+   - name: Start Nginx
+     service: name=nginx state=started
+
+
+
+
+---->  Remove Nginix -   ansible dev -b -m yum -a "name=nginx state=absent"
+
+
+
+---
+- hosts: dev
+  gather_facts: false
+  become: true
+  tasks:
+    - name: install httpd
+      yum:
+         name=httpd state=latest
+    - name: Place the index file at project
+      copy:
+         src: /home/training/index.html
+         dest: /var/www/html/
+         owner: apache
+         group: apache
+         mode: 0644
+    - name: restart apache
+      service:
+           name: httpd
+           state: restarted
+...
+
+
+
+
+
+
+
+
+
+ansible-playbook --connection=local 127.0.0.1 playbook.yml
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

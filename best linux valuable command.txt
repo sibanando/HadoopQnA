@@ -1,0 +1,951 @@
+https://www.lazysystemadmin.com/2010/09/get-rid-of-deleted-open-files-linux.html
+
+https://grepora.com/2018/05/14/disk-space-is-not-released-after-deleting-many-files/
+
+ls -l /proc/*/fd/* | grep deleted
+lsof -nP | grep '(deleted)'
+ 
+## Only works on Linux ##
+find /proc/*/fd -ls | grep  '(deleted)'
+
+
+lsof / | grep deleted
+lsof / | grep deleted | awk '{print $2 }' | xargs kill -9
+
+du -h --max-depth=1  -> check big directory
+
+========
+
+Free up the Space
+
+As already said, we cannot remove the file, but what we can do is getting the size down to zero. And that's done as with every other file, e.g. if you use bash (or ksh) - what is most likely under Linux:
+
+myserver1# > /proc/25139/fd/4
+myserver1# df -Ph /var
+Filesystem            Size  Used Avail Use% Mounted on
+/dev/mapper/root-var  7.1G  4.9G  1.2G  69% /var
+As we see there is again free space under /var, and the process is still running:
+
+myserver1# lsof | grep var/log/myapp/userlog
+myapp    25139      root   4w     REG      3,12       0        0  /var/log/myapp/userlog (deleted)
+
+What more could be done...?
+
+As said before you can work on this file as you work on real files. That means, you could even save this file and compress it before getting its size down to 0:
+
+myserver1# cp /proc/25139/fd/4 /tmp/userlog
+myserver1# gzip -9 /tmp/userlog
+myserver1# mv /tmp/userlog.gz /var/log/myapp/userlog.1.gz
+myserver1# > /proc/25139/fd/4
+=========
+
+
+Am I running out of inodes?
+$ df -i
+
+Find unwanted files and delete or move to another server.
+Find unwanted large files and delete or move to another server.
+
+
+
+Linux find a biggest files in /
+Run the command:
+du -a /dir/ | sort -n -r | head -n 20
+
+OR
+du -a / 2>/dev/null | sort -n -r | head -n 20
+
+ps aux | awk '{ print $8 " " $2 }' | grep -w Z
+
+
+======================
+
+
+Difference b/w exec and xargs
+============================
+
+exec
+find /home/user/logs -type f -name '*.log' -mtime +30 -exec rm -f { } \;
+exec will remove logs something like this
+
+rm -f something1.log
+rm -f something2.log
+rm -f somethng3.log
+xargs
+find /home/user/logs -type f -name '*.log' -mtime +30 | xargs rm -f { } \;
+xargs will remove logs like below
+
+rm -f something1.log something2.log something3.log
+
+
+
+=
+#!/bin/bash
+/usr/bin/find /path/to/files/ -type f -name '*.jpg' -mtime +15 -exec mv {} /path/to/archive/ \;
+/usr/bin/find /path/to/archive/ -type f -name '*.jpg' -mtime +30 -exec rm {} \;
+
+
+
+=====
+
+rm `ls -ltr | grep "Nov 22" | awk '{print $8}'`
+
+ 
+rm `ls -ltr | grep "Nov 22" | awk '{print $8}'` 
+ 
+ 
+ll -thor | grep Feb | awk '{ print $8}'  | xargs rm -f 
+ 
+
+
+ps -ef | grep v1funcr | awk '{print $2}' | xargs kill -9
+ps -ef | grep mapr | awk '{print $2}' | xargs kill -9
+
+========
+
+echo 10 > /proc/sys/vm/swappiness
+
+=====
+groupadd -g 5000 mapr
+useradd -g 5000 -u 5000 mapr
+useradd -m -u 5000 -g 5000 -G $(stat -c '%G' /etc/shadow) mapr
+echo "mapr:mapr" | chpasswd
+gpasswd -a mapr mapr
+echo 'mapr ALL =(ALL) NOPASSWD: ALL' >>  /etc/sudoers
+=====
+
+
+#!/bin/bash
+for i in `cat phy-list-2`
+do echo "----$i----"
+echo "172.23.224.0/24 via 172.23.230.1 dev eth2" | ssh root@$i 'cat >>/etc/sysconfig/network-scripts/route-eth2'
+ssh $i service network start
+done
+
+#!/bin/bash
+
+old_sp="siba"
+new_sp="siba01"
+
+echo -n "What's your name: "
+
+read name
+
+echo "Hi $name,"
+
+
+while true; do
+  read -p "Make sure to keep all the setup files under directory /root/backup/MEP.6.1/ including this script and then run. Are you sure everything under mentioned directory and continue to run the script?" yn
+  case $yn in
+    [Yy]* ) echo "Starting the $0 script `date`"; break;;
+    [Nn]* ) exit;;
+    * ) echo "Please answer yes or no.";;
+  esac
+done
+
+/bin/sleep 1
+echo ""
+
+if [ $name == 'siba' ]
+then
+echo "$old_sp  am in."
+elif [ $1 == b ]
+then
+echo "entered 2"
+else
+echo "It is exited ,not mentioned the servers "
+fi
+================================
+
+months=( January February ... December )
+select choice in "${months[@]}" Exit; do
+    if [[ $choice = "Exit" ]]; then
+        break 
+    elif [[ " ${months[*]} " == *" $choice "* ]]; then
+        echo "$choice"
+    else
+        echo "invalid selection: $REPLY"
+    fi
+done
+========================
+while true; do
+    read x
+    case $x of
+        exit) break ;;
+        1) echo January ;;
+        2) echo February ;;
+        # ...
+        12) echo December ;;
+        *) echo "Unknown response, enter a number 1-12 or type 'exit' to quit" ;;
+    esac
+done
+
+=========================
+while true
+do
+    echo "Would you like to:"
+    echo "1) See your name"
+    echo "2) See your current directory"
+    echo "3) See your home directory"
+    echo "4) Quit"
+    echo -n ">> "
+    read case
+
+    case "$case" in
+        1) echo "username";;
+        2) echo "$PWD";;
+        3) echo "$HOME";;
+        4) break;;
+    esac
+done
+
+echo "Quit"
+==========
+#!/bin/sh 
+x=0 
+echo Enter the number 
+read x 
+case $x in 
+
+1) 
+echo January
+;; 
+2) 
+echo February
+;; 
+3) 
+echo March
+;; 
+4) 
+echo April
+;; 
+5) 
+echo May
+;; 
+6) 
+echo June
+;; 
+7) 
+echo July
+;;
+8) 
+echo August
+;;
+9) 
+echo September
+;; 
+10) 
+echo October
+;; 
+11) 
+echo November
+;; 
+12) 
+echo December
+;; 
+*) 
+echo Not sure that about one 
+;; 
+
+esac
+done
+
+Recently ran into this issue when using apt or aptitude upgrade.
+
+df -h
+
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/xvda1      7.8G  5.1G  2.3G  70% /
+
+df -i
+
+Filesystem     Inodes  IUsed  IFree IUse% Mounted on
+/dev/xvda1     524288 521497   2791  100% /
+Issued command:
+
+du /|sort -k1 -n
+Revealed most of files were in subfolders for several kernel versions within:
+
+/usr/src/linux-headers
+Removed those subfolders and inode problem was fixed.
+
+df -i
+
+
+
+
+du --inodes -d 3 / | sort -n | tail
+
+sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
+
+#!/bin/bash
+for i in `cat prod-list`
+do echo "----$i----"
+ssh $i cp /etc/resolv.conf /etc/resolv.conf.org
+cat /root/resolv.conf | ssh root@$i 'cat > /etc/resolv.conf'
+done
+
+ 1  sestatus
+    2  vi /etc/selinux
+    3  vi /etc/selinux/config
+    4  getenforced
+    5  getenforce
+    6  sestatus
+    7  service firewalld statsu
+    8  service firewalld status
+    9  service firewalld stop
+   10  systemctl disable firewalld
+   11  clear
+   12  vi /etc/ssh
+   13  vi /etc/ssh/ssh_config
+   14  vi /etc/ssh/sshd_config
+   15  service sshd restart
+   16  hostname -i
+   17  hostname -f
+   18  exit
+   19  cat /etc/redhat-release
+   20  uname -r
+   21  uname -a
+   22  cat /etc/os-release
+   23  hostnamectl
+   24  cat /etc/hosts
+   25  passwd root
+   26  ssh-keygen
+   27  ssh-copy-id -i root@10.128.0.47
+   28  ssh 10.128.0.47
+   29  ip a | grep eth0
+   30  ssh 10.128.0.47
+   31  vi ssh01.sh
+   32  for i in 10.128.0.47; do ssh $i hostnamectl; done
+   33  for i in 10.128.0.47; do ssh $i hostnamectl date ; done
+   34  for i in 10.128.0.47; do ssh $i hostnamectl;date ; done
+   35  for i in 10.128.0.47; do ssh $i free -g  ; done
+   36  hostname -i
+   37  vi test01
+   38  for i in `test01`; do ssh $i free -g  ; done
+   39  for i in 'test01'; do ssh $i free -g  ; done
+   40  for i in `cat test01`; do ssh $i free -g  ; done
+   41  for i in `cat test01`; do echo "----$i----"  ssh $i free -g  ; done
+   42  ll
+   43  vi ssh01.sh
+   44  chmod +x ssh01.sh
+   45  ./ssh01.sh
+   46  history
+   47  ll
+   48  cat ssh01.sh
+   49  rpm -qa | grep httpd
+   50  yum install httpd
+   51  yum install httpd -y
+   52  rpm -qa | grep httpd
+   53  yum list | grep httpd
+   54  systemctl start httpd
+   55  systemctl status httpd
+   56  netstat -tlnup | grep 80
+   57  man netstat
+   58  systemctl stop httpd
+   59  systemctl status httpd
+   60  netstat -tlnup | grep 80
+   61  netstat -tlnup | grep 22
+   62  systemctl start httpd
+   63  systemctl status httpd
+   64  systemctl stop httpd
+   65  history
+   66  netstat -tlnup | grep 80
+   67  systemctl start httpd
+   68  netstat -tlnup | grep 80
+   69  cd /var/www/html/
+   70  ll
+   71  ls -ltr  /var/www/html/
+   72  ls -ltr  /var/www/
+   73  cd ..
+   74  cd -
+   75  cd
+   76  cd -
+   77  cd
+   78  pwd
+   79  cd -
+   80  pwd
+   81  vi index.html
+   82  systemctl restart httpd
+   83  man rpm
+   84  man yum
+   85  yum info httpd
+   86  yum deplist httpd
+   87  man rpm
+   88  cat /etc/redhat-release
+   89  yum install wget curl
+   90  cd
+   91  wget http://mirror.centos.org/centos/7.7.1908/os/x86_64/Packages/vsftpd-3.0.2-25.el7.x86_64.rpm
+   92  ll
+   93  rpm -ivh /root/vsftpd-3.0.2-25.el7.x86_64.rpm
+   94  rpm -qa | grep httpd
+   95  rpm -qa | grep vsftpd
+   96  systemctl start vsftpd
+   97  systemctl status vsftpd
+   98  yum info vsftpd
+   99  man yum
+  100  history
+  101  man rpm
+  102  yum check-list httpd
+  103  yum checklist httpd
+  104  man yum | grep check
+  105  yum check httpd
+  106  yum listinfo httpd
+  107  yuminfo httpd
+  108  cd /var/ftp/pub
+  109  ll
+  110  touch t1 t2 t3
+  111  ll
+  112  systemctl status vsftpd
+  113  netstat -tlnup | grep 21
+  114  yum install -y ansible
+  115  ansible -version
+  116  ansible --version
+  117  history
+ 
+ 
+ 
+ ps -ef | grep infdcib* | grep find | awk '{ print $2 }'  >  processId4
+##########################
+input="/root/home/infdcibmsd/processId4"
+while IFS= read -r line
+do
+kill -9 $line
+done < "$input" 
+################## 
+input="/tmp/packagelist"
+while IFS= read -r line
+do
+package=`rpm -qa | grep $line`
+ 
+if [ ! -z $package ]
+then
+echo $line is available 
+else
+echo $line is not available 
+fi
+done < "$input" 
+####################
+ps -ef | grep mapr| awk '{print $2}' | xargs kill -9 
+
+rm -rf `ls -lrt | grep -i "Mar"` 
+
+x=`find . -type f -name "*SOFTWARE_REDBACK*.zip"  -print | xargs ls | head -5`
+
+##############
+basepath=/mapr/maprprod.ss.sw.ericsson.se/data/filelanding/filedata/informatica/Deployments/IBMS
+
+count1=`ls $basepath/SELCTD_ZIPFILES | wc -l`
+
+
+Testing
+
+if [ $count1 -lt 6000 ]
+then
+
+cd $basepath/Intermediate
+
+last=`ls -ltr | head -5  | awk '{print $9,$10,$11}'`
+
+mv $last -t ../SELCTD_ZIPFILES/
+
+fi
+#############################
+#!/bin/sh
+
+errorCheck=`cat flume.log | grep "$date" | grep error`
+
+failedCheck=`cat flume.log | grep "$date" | grep failed`
+
+
+
+if [ ! -z "$errorCheck" ]
+then
+   mail -s "Flume Error/Failed Alarm"  support.hadoop@tcs.com  < /mapr/MapRDev/hadoopAdm_scripts/mail_alarm/flumeFailed.csv
+
+elif [ ! -z "$failedCheck" ]
+then
+   mail -s "Flume Error/Failed Alarm" support.hadoop@tcs.com  < /mapr/MapRDev/hadoopAdm_scripts/mail_alarm/flumeFailed.csv
+else
+   echo "Flume is running fine "
+fi
+
+
+
+
+sh /mapr/MapRDev/hadoopAdm_scripts/flume_alarm/FlumeError.sh
+
+
+#!/bin/bash 
+file=/etc/passwd 
+# set field delimiter to : # read all 7 fields into 7 vars 
+while IFS=: read -r user enpass uid gid desc home shell 
+do 
+# only display if UID >= 500
+ [ $uid -ge 500 ] && echo "User $user ($uid) assigned \"$home\" home directory with $shell shell." 
+done < "$file"
+
+
+=====Swap====
+[root@cpanel ~]# swapon -s
+[root@cpanel ~]# free -m
+              total        used        free      shared  buff/cache   available
+Mem:           7317         193        7021           8         102        6936
+Swap:             0           0           0
+[root@cpanel ~]# df -h
+Filesystem      Size  Used Avail Use% Mounted on
+devtmpfs        3.6G     0  3.6G   0% /dev
+tmpfs           3.6G     0  3.6G   0% /dev/shm
+tmpfs           3.6G  8.5M  3.6G   1% /run
+tmpfs           3.6G     0  3.6G   0% /sys/fs/cgroup
+/dev/sda1        50G  1.8G   49G   4% /
+tmpfs           732M     0  732M   0% /run/user/1000
+tmpfs           732M     0  732M   0% /run/user/0
+[root@cpanel ~]# dd if=/dev/zero of=/swapfile count=4096 bs=1MiB
+4096+0 records in
+4096+0 records out
+4294967296 bytes (4.3 GB) copied, 21.5609 s, 199 MB/s
+[root@cpanel ~]# swapon -s
+[root@cpanel ~]# chmod 600 /swapfile
+[root@cpanel ~]# mkswap /swapfile
+Setting up swapspace version 1, size = 4194300 KiB
+no label, UUID=9e84d995-8851-4c0c-9d3c-f5fba853f566
+[root@cpanel ~]# swapon /swapfile
+[root@cpanel ~]# vi /etc/fstab
+[root@cpanel ~]# vi /etc/sysctl.conf
+[root@cpanel ~]# cat /etc/fstab
+
+#
+# /etc/fstab
+# Created by anaconda on Mon Oct 14 19:25:39 2019
+#
+# Accessible filesystems, by reference, are maintained under '/dev/disk'
+# See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info
+#
+UUID=b8a07faa-b86b-406b-9158-c5d9c617a5e7 /                       xfs     defaults        0 0
+/swapfile swap swap sw 0 0
+[root@cpanel ~]# cat /etc/fstab
+
+#
+# /etc/fstab
+# Created by anaconda on Mon Oct 14 19:25:39 2019
+#
+# Accessible filesystems, by reference, are maintained under '/dev/disk'
+# See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info
+#
+UUID=b8a07faa-b86b-406b-9158-c5d9c617a5e7 /                       xfs     defaults        0 0
+/swapfile swap swap sw 0 0
+[root@cpanel ~]#
+
+
+kernel update(Tune To Linux youtube)
+---------
+https://elrepo.org/linux/kernel/el7/x86_64/RPMS/
+
+wget https://elrepo.org/linux/kernel/el7/x86_64/RPMS/kernel-ml-5.7.4-1.el7.elrepo.x86_64.rpm
+
+yum --enablerepo=elrepo-kernel install kernel-ml	
+
+
+
+rhelpatch.repo
+[rhel-6.8]
+name=rhel6.8
+baseurl=file:///rhel-6.8
+
+Rhn classic subscriptions
+Redhat satellite <---proxy server
+local repository
+ftp/http repository
+
+1.#rhn_register 
+2.ask for redhat subscriptions ID and username and passwd
+
+download local repo in the systemctl
+3.#yum repolist
+
+1.spacewalk-chanel -l
+2.spacewalk-chanel -c mysattelite-chanel -u user -p password
+we will see the repo in local
+
+yum history
+rpm -qa | grep yum
+lsb_release -a
+yum check-update -> check update packages
+yum history
+yum upadateinfo history
+yum upadateinfo --security
+yum --help
+yum update --security
+yum update
+#yum history summary
+#yum history undo <ID no> -rollback
+
+#cd /var/lib/yum/history/2020-02-03/7
+#ll
+#vi confi-main
+
+and check exclude=
+https://opensourceforu.com/
+https://dl.fedoraproject.org/pub/
+
+rpm -ql yum-plugin-security-5.7.el6.noauchuch
+/etc/yum/pluginconf.d/security.conf -->enablerepo
+
+yum deplist httpd
+
+for LVM
+------
+
+df -HT
+unmount /data/
+lvremove /dev/mapper/vg01-lv01
+lvs lv01
+
+vgs vg01
+
+Recover LVM
+-----
+cd /etc/lvm
+ll
+cd backup
+ls 
+cd vg01
+cd ../metadata
+ll
+cd ../archive/
+ll
+vgcfgbackup --> taking backup of vg01
+cd /etc/lvm/backup
+ll
+
+vgcfgrestore --list vg01 --> give more info on vg01
+
+vgcfgrestore -f /etc/lvm/archive/vg010000_00022.vg vg01
+lvs vg01
+vgchange -ay vg01
+lvchange -ay /dev/mapper/vg01-lv01
+
+
+For Volumegroup
+--------
+before take the backup of vg01 in /tmp/vg01
+unmount /data/
+vgremove vg01
+copied the cp /tmp/vg01 /etc/lvm/backup/vg001
+vgrestore -f /etc/lvm/backup/vg001 /etc/lvm/backup/vg01-lv01
+
+
+lvconvert -m1 --corelog -b /dev/mapper/vg01-lv01 /dev/sdn 
+lvs -a -o +devices vg01
+lvs
+lvconvert -m0 /dev/mapper/vg01-lv01 /dev/sdb
+
+
+
+
+
+
+
+
+ Repository
++++++++++
+
+/etc/yum.repos.d/remote.repo
+
+
++++++++
+
+[remote]
+
+name=RHEL Apache
+
+baseurl=http://192.168.1.10
+
+enabled=1
+
+gpgcheck=0
+
++++
+
+[remote] 
+
+name=RHEL FTP
+
+baseurl=ftp://192.168.1.10
+
+enabled=1
+
+gpgcheck=0
+
+yum install createrepo yum-utils -y
+
+createrepo /var/www/html/CentOS-8-2-2004-x86_64-dvd/
+
+
+
+Configure SCSI target and initiator 
+===================================
+Master side
+----------
+
+yum install targetcli -y
+
+systemctl start target
+
+pvs
+pvs -a -o +dev_size
+lsblk
+pvcreate /dev/sdb /dev/sdc
+pvs
+vgcreate iscsivg /dev/sdb;lvcreate -l100%FREE -n iscsilv iscsivg
+lvs
+targetcli
+>ls
+>cd backstores/
+>ls
+>cd block
+>ls
+>create LUN001 /dev/sdc
+>create LUN002 /dev/iscsivg/iscsilv
+>ls
+> cd
+>ls
+> cd iscsi/
+>ls
+>create iqn.2020.06.19.com.test:server
+>ls 
+>cd iqn.2020.06.19.com.test:server/tpg1/acls
+>ls
+>create iqn.2020.06.19.com.test:client
+>cd ../..
+tpg1>ls
+>cd luns/
+> create /backstores/block/LUN001
+>create /backstores/block/LUN002
+>cd
+>saveconfig
+>exit
+ 
+Client side
+------------
+
+yum install iscsi_initiator-utils
+vi /etc/iscsi/initiatorname.iscsi
+
+Initiator=iqn.2020.06.19.com.test:client
+
+:wq!
+
+systemctl start iscsi
+
+Discover iscsi target wirh default 3260
+run
+iscsiadm -m discovery -t st -p 192.168.1.107:3260
+iscsiadm -m discovery -t st -p 192.168.1.109:3260
+
+login in master (iscsi target server)to access LUNs
+iscsiadm -m node -T iqn.2020.06.19.com.test:server -p 192.168.1.107:3260 -u 
+-u --> indicate logout
+-l => indicate login
+
+iscsiadm -m node -T iqn.2020.06.19.com.test:server -p 192.168.1.109:3260 -l
+
+Multipath
+--------
+Add 3 lan card to server
+
+pvs
+ip a
+multipath/HBA/port
+
+yum install device-mapper-multipath -y
+systemctl start multipathd
+multipath -ll
+
+-> you can run /sbin/mpathconf to create or modify /etc/multipath.conf
+mpathconf --user_friendlynames n
+
+check module
+modeprobe multipath
+
+systemctl restart multipath
+multipath -ll
+
+toubleshoot multipath
+lsmod | grep dm_multipath
+lsmod --help
+
+by this created the file check and required modify
+
+vi /etc/multipath.conf
+
+# defaults {
+ #   user_friendlynames no
+#	find_multipaths yes
+#
+-- 
+
+#defaults {
+ #polling_interval 10
+# --
+# --
+# --
+ #--
+# user_friendlynames no/yes
+# }
+ enable
+ 
+ do blacklist disks
+ 
+ provide alias
+ 
+ in multipath section
+ multipath{
+  multipath{
+  --
+  --
+  }
+  multipath{
+  wwid  <networkid>
+  alias DATA
+ }
+ multipath{
+  wwid  <networkid>
+  alias PROD
+ }
+ }
+ systemctl restart multipath
+ 
+ check ifdown and ifup the network.
+ 
+ =================
+ Important steps to remember
+ ======
+ 
+ -> Scan New LUN
+ [root@client ~]# #we can find after running lssci -s or multipath
+[root@client ~]# # the disk but not show in in lsblk or fdisk -l
+[root@client ~]# # you can scan by rescan-scsi-bus.sh -r or echo"---" > /sys/class/scsi_host or fc_host/host{x}/scan
+
+ 
+ #echo"---" > /sys/class/scsi_host or fc_host/host{x}/scan
+ #rescan-scsi-bus.sh -r
+ 
+ => "---" this command means CTL("Chanel on HBA""Target SCSI ID""LUN")
+ -> Check new LUN assign with size
+ #pvs -a -o +dev_size
+ (this LUN is not assigned to any VG)
+ #scsi_id -s -g /block/ssd
+ 
+ #lspci|grep -i hba
+ #lspci|grep -i fc
+ #ls -ltr /sys/class/fc_host/host*/port_name
+ 
+ Check port id
+ systool -c fc_host -A "port_id"
+ numeric -> indicate HBA connected to san storage(0x740f00)
+ 00000 -> not connected to san
+ 
+ systool -c fc_transport -v
+ shows port_id and port_name and rport->indicate connected to san
+ (port_name = wwn no)
+ systool -c fc_host -A "port_name"
+ systool -c fc_host -A "port_state"
+ Device path
+ systool -b scsi -v | grep -i "target0:0:0"
+ scisi_id -g -s /block/ssd
+ show wwn no of disk
+ 
+ -----
+ pvcreate /dev/sd{x}
+ vgextend datavg /dev/sd{x}
+ display -v datavg
+ pvs -a -o +devices | grep datavg
+ lvextend -L +1G /dev/datavg/datalv
+ vgdisplay -v /datavg
+ lvextend -l +255 /dev/datavg/datalv
+ resize2fs /dev/datavg/datalv
+ 
+ 
+ 
+ =====
+ 
+ cat /proc/PID/limits
+ cat /proc/2497/limits
+ ulimit -a
+ 
+ Limits can also be set up by group so that you can, say, give developers the ability to run more processes than managers. Lines like these in your limits.conf file would do that:
+
+@managers          hard    nproc           50
+@developers        hard    nproc          200
+If you want to limit the number of open files, you just use a different setting.
+
+@managers          hard    nofile         2048
+@developers        hard    nofile         8192
+sbob		   hard    nofile	  8192
+Here we've given two groups and one individual increases in their open files limits. These all set hard limits. If you set soft limits as well, the users will get warnings when they reach the lower limit.
+
+@developers        soft    nofile         2048
+@developers        hard    nofile         8192
+
+If you limits.conf file permits, you might see limits like these set up for particular applications that really need the extra capacity. In this example, the oracle user is being given the ability to run up to 16,384 processes and open 65,536 files. These lines would be set up in the oracle user's .bash_profile.
+
+if [ $USER = "oracle" ]; then
+  if [ $SHELL = "/bin/ksh" ]; then
+    ulimit -p 16384
+    ulimit -n 65536
+  else
+    ulimit -u 16384 -n 65536
+  fi
+  
+ 
+ ===============
+ 
+  
+/var/mapr/local/$(hostname -f)/spark -replication 1 -localvolumehost $(hostname -f)" 
+ 
+ 
+runuser -l mapr -c 'ulimit -SHa' 
+ 
+ https://wcdma-confluence.rnd.ki.sw.ericsson.se/display/TAE/New+MapR+Data+Node+Addition+in+Cluster 
+ 
+ 
+
+ 
+
+
+lshw -class network
+
+ 
+ lspci | egrep -i --color 'network|ethernet'
+ 
+ netstat -i
+ nmcli device status
+  nmcli connection show
+  ethtool eth0
+  lspci | grep -i eth
+  
+ dmidecode | egrep -i "PCI|Available|in use"
+ dmidecode | grep -i "NIC"
+  
+  ip -s link
+  
+  ls -l /sys/class/net/
+  
+  lspci -nn |grep Ether
+  
+  cat /proc/net/bonding/team0
+  cat /proc/net/bonding/bond0
+  
+  ============================
+  AWX installation
+  ======================
+  
+  yum -y install  git gettext ansible docker nodejs npm gcc-c++ bzip2 python-docker-py
+  
+  
+  
+ 
+
+

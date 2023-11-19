@@ -4,6 +4,8 @@ sudo growpart /dev/nvme0n1 2
 sudo lsblk
 df -hT
 sudo xfs_growfs -d /mnt #### for xfs
+or 
+sudo xfs_growfs /dev/nvme0n1p1
 or
 sudo resize2fs /dev/nvme0n1p1 for ext4
 

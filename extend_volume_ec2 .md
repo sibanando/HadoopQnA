@@ -3,7 +3,7 @@ sudo lsblk
 sudo growpart /dev/nvme0n1 2
 sudo lsblk
 df -hT
-sudo xfs_growfs -d /mnt #### for xfs
+sudo xfs_growfs -d /mnt #### for xfs and extend the /mnt  mount
 or 
 sudo xfs_growfs /dev/nvme0n1p1
 or
